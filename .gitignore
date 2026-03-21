@@ -22,3 +22,16 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Archivo de records local
+records.txt
+
+# Configuración de IntelliJ/VS Code
+.idea/
+*.iml
+out/
+
+.vscode/
+bin/
+
+src/Imagenes/image0.jpg
