@@ -8,12 +8,12 @@ El juego consiste en despejar un tablero de casillas sin revelar ninguna mina. E
 
 ## Controles
 
-Click derecho: despejar casilla.
-Click izquierdo: Colocar/quitar banderilla.
+- Click izquierdo: despejar casilla.
+- Click derecho: Colocar/quitar banderilla.
 
 ## Características
 
-- Hay res niveles de dificultad: fácil (9x9, 10 minas), normal (14x14, 40 minas) y difícil (20x20, 99 minas).
+- Hay tres niveles de dificultad: fácil (9x9, 10 minas), normal (14x14, 40 minas) y difícil (20x20, 99 minas).
 - Cronómetro en la partida
 - Registro de mejores tiempos por dificultad
 - Sistema de banderillas para marcar minas
