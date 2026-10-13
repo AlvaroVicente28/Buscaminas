@@ -51,22 +51,24 @@ public class Casilla {
   }
 
   /**
-   * Pone una mina en la casilla
+   * Pone o quita una mina en la casilla
+   * @param hayMina {@code true} para poner mina, {@code false} para quitarla
    */
-  protected void setMina() { 
-    this.hayMina = !this.hayMina;
+  protected void setMina(boolean hayMina) { 
+    this.hayMina = hayMina;
   }
 
   /**
-   * Pone una banderilla en la casilla
+   * Pone o quita una banderilla en la casilla
+   * @param hayBanderilla {@code true} para poner banderilla, {@code false} para quitarla
    */
-  protected void setBanderilla() {
-    this.hayBanderilla = !this.hayBanderilla;
+  protected void setBanderilla(boolean hayBanderilla) {
+    this.hayBanderilla = hayBanderilla;
   }
 
   /**
    * Cambia el número asociado a la casilla
-   * @param numero nuevo número de la casilla.
+   * @param numero nuevo número de la casilla
    * Si {@code numero} es 0, se cambia al String vacío
    */
   protected void setNum(int numero) {
@@ -78,6 +80,7 @@ public class Casilla {
    */
   protected void setFallo(){
     if (hayBanderilla && !hayMina){
+      hayBanderilla = false;
       num = "X";
     }
   }

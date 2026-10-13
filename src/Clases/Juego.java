@@ -6,11 +6,12 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Juego {
-  private Casilla[][] tablero;
+  private final Casilla[][] tablero;
+  private final int casillasFin;
+  private final int minas;
+  private int banderillas;
   private boolean primerClick = true;
-  private int minas;
   private int casillasDespejadas;
-  private int casillasFin;
   private ArrayList<Point> list;
 
   /**
@@ -30,6 +31,7 @@ public class Juego {
       throw new IllegalArgumentException("Parámetros de juego inválidos: No hay espacio para las minas (minas + 9 > tamano * tamano)");
     }
     this.minas = minas;
+    banderillas = minas;
     casillasDespejadas = 0;
     list = new ArrayList<>();
     tablero = new Casilla[tamano][tamano]; //Inicializo el tablero
@@ -59,9 +61,9 @@ public class Juego {
     //Se genera el tablero con el primer click para que no puedas pulsar una mina al inicio
     if (primerClick){ 
       primerClick = false; //Solo pasa la 1ª vez
-      excluirInicio(x, y);
+      excluirInicio(x, y, true);
       ponerMinas();
-      excluirInicio(x, y);
+      excluirInicio(x, y, false);
       ponerNumeros();
     }
     despejarCasilla(casilla);
@@ -87,21 +89,27 @@ public class Juego {
    * Click para poner o quitar una banderilla de una {@code Casilla}
    * @param x coordenada x
    * @param y coordenada y
-   * @return variación de banderillas
+   * @return
    */
-  public int clickBanderilla(int x, int y) {
+  public boolean clickBanderilla(int x, int y) {
     //No se pone banderilla si no se ha despejado con el primer click
     if (primerClick){ 
-      return 0;
+      return false;
     }
     //Caso en el que la casilla ya tiene una banderilla
     if (tablero[x][y].getBanderilla()) {
-      tablero[x][y].setBanderilla();
-      return 1;
+      tablero[x][y].setBanderilla(false);
+      banderillas++;
+      return true;
     }
-    //Caso en el que la casilla no tiene una banderilla
-    tablero[x][y].setBanderilla();
-    return -1;
+    //Caso en el que no quedan más banderillas
+    if (banderillas == 0){
+      return false;
+    }
+    //Caso en el que la casilla no tiene una banderilla 
+    tablero[x][y].setBanderilla(true);
+    banderillas--;
+    return true;
   }
 
   /**
@@ -173,10 +181,11 @@ public class Juego {
    * Rodea de minas alrededor de la {@code Casilla} (x,y). Si había minas, entonces se quitan
    * @param x coorednada x
    * @param y coordenada y
+   * @param caso
    */
-  private void excluirInicio(int x, int y) {
+  private void excluirInicio(int x, int y, boolean caso) {
     for (Casilla casilla : vecinos(x,y)){
-      casilla.setMina();
+      casilla.setMina(caso);
     }
   }
 
@@ -188,7 +197,7 @@ public class Juego {
       int fila = (int)(Math.random() * tablero.length);
       int columna = (int)(Math.random() * tablero.length);
       if (!tablero[fila][columna].getHayMina()) { //Casilla sin mina
-        tablero[fila][columna].setMina();
+        tablero[fila][columna].setMina(true);
         i++;
       }
     }
@@ -250,6 +259,10 @@ public class Juego {
       throw new NullPointerException("La casilla es null");
     }
     if (!casilla.setVisible()){
+      if (casilla.getBanderilla()){
+        casilla.setBanderilla(false);
+        banderillas++;
+      }
       casillasDespejadas++;
       return true;
     }
@@ -298,6 +311,14 @@ public class Juego {
    */
   public boolean getPrimerClick(){
     return primerClick;
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public int getBanderillasRestantes() {
+    return banderillas;
   }
 
   public enum Resultado {

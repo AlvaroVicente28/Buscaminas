@@ -36,7 +36,9 @@ public class Tablero {
   private static final Color MORADO = new Color(121, 73, 209);
   private static final Color AZUL = new Color(73, 93, 209);
 
-  private JFrame ventana;
+  private final JFrame ventana;
+  private final  JComboBox<String> reinicio;
+  private final HashMap<String, ImageIcon> cacheImagenes = new HashMap<>();
   private JPanel panelBanderillas;
   private JPanel panelSuperior; 
   private JPanel leftPanel;
@@ -45,13 +47,10 @@ public class Tablero {
   private JLabel imagen1;
   private JLabel imagen2;
   private JLabel labelTimer;
-  private JComboBox<String> reinicio;
   private Juego juego;
   private Timer timer;
   private Dificultad dificultad;
-  private int minas; 
   private int segundos;
-  private HashMap<String, ImageIcon> cacheImagenes = new HashMap<>();
   private static final String[] rutas = {
     "/Imagenes/Cero.png", 
     "/Imagenes/Uno.png", 
@@ -166,7 +165,7 @@ public class Tablero {
       timer.stop();
     }
     dificultad = opcion;
-    int tamano = 0, tamanoCasilla = 0;
+    int tamano = 0, tamanoCasilla = 0, minas = 0;
     switch (opcion){            //Tamaños y minas para cada dificultad
       case FACIL: minas = MINAS_FACIL; tamano = TAMANO_FACIL; tamanoCasilla = CELDA_FACIL; break;
       case NORMAL: minas = MINAS_NORMAL; tamano = TAMANO_NORMAL; tamanoCasilla = CELDA_NORMAL; break;
@@ -280,21 +279,28 @@ public class Tablero {
    */
   private void manejarClickDesp(int x, int y){
     boolean primerClick = juego.getPrimerClick();
-    Resultado res = juego.clickDesp(x, y);  //OBS: si res = BANDERILLA no se hace nada 
-    if (res == Resultado.SEGUIR){ //Caso normal
-      Casilla casilla = juego.getCasilla(x, y); 
-      String num = casilla.toString();
-      despejarCasilla(x, y, num);
+    Resultado res = juego.clickDesp(x, y);
+    if (primerClick){
+      iniciarTimer();
     }
-    else if (res == Resultado.HUECO || res == Resultado.DERROTA){ //Caso click en hueco o click en mina
-      if (primerClick){
-        iniciarTimer();
-      }
-      despejarHuecos(res);
-    }
-    else if (res == Resultado.VICTORIA) { //Caso victoria
-      despejarHuecos(res);
-      finPartida(true);
+    switch(res){  //OBS: si res = BANDERILLA no se hace nada 
+      case SEGUIR:
+        Casilla casilla = juego.getCasilla(x, y); 
+        String num = casilla.toString();
+        despejarCasilla(x, y, num); break;
+
+      case HUECO:
+        despejarHuecos(res); break;
+
+      case DERROTA:
+        despejarHuecos(res);
+        finPartida(false); break;
+      
+      case VICTORIA:
+        despejarHuecos(res);
+        finPartida(true); break;
+
+      default: break;
     }
   }
 
@@ -304,16 +310,11 @@ public class Tablero {
    * @param y coordenada y
    */
   private void manejarClickBanderilla(int x, int y){ 
-    Casilla casilla = juego.getCasilla(x, y); 
-    if (minas > 0 || casilla.getBanderilla()) {
-      int variacion = juego.clickBanderilla(x, y);   //Actualizo el numero de banderillas
-      if (variacion != 0){
-        minas += variacion;
-        String str = casilla.getBanderilla() ? "🚩" : "";
-        botones[x][y].setText(str);
-        botones[x][y].setForeground(addColorText(str));
-        numBanderillas();
-      }
+    if(juego.clickBanderilla(x, y)) {
+      String str = juego.getCasilla(x, y).getBanderilla() ? "🚩" : "";
+      botones[x][y].setText(str);
+      botones[x][y].setForeground(addColorText(str));
+      numBanderillas();
     }
   }
 
@@ -340,15 +341,6 @@ public class Tablero {
   private void despejarHuecos(Resultado opcion) { 
     for(Point punto : juego.getList()){
       Casilla casilla = juego.getCasilla(punto.x, punto.y);
-      if (casilla.getBanderilla()) {
-        casilla.setBanderilla();  
-        if (opcion == Resultado.HUECO || opcion == Resultado.VICTORIA){
-          minas++;
-        }
-        else if (casilla.getHayMina()){
-          casilla.setBanderilla(); //Se quedan marcadas las banderas correctas
-        }
-      }
       despejarCasilla(punto.x, punto.y, casilla.toString());            
     }
     numBanderillas();
@@ -415,7 +407,8 @@ public class Tablero {
    * Pone las imagenes que corresponda con el numero de banderillas restantes
    */
   private void numBanderillas(){ 
-    int decenas = minas / 10, unidades = minas % 10;
+    int banderillas = juego.getBanderillasRestantes();
+    int decenas = banderillas / 10, unidades = banderillas % 10;
     //Primer numero
     imagen1.setIcon(getImageIcon(rutas[decenas], 50, 50)); 
     //Segundo numero
