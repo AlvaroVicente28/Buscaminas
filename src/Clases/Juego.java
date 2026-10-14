@@ -314,8 +314,8 @@ public class Juego {
   }
 
   /**
-   * 
-   * @return
+   * Getter de las banderillas
+   * @return nº de banderillas restantes
    */
   public int getBanderillasRestantes() {
     return banderillas;

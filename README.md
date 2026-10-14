@@ -27,6 +27,7 @@ Las imágenes utilizadas en el juego (números, banderilla e icono de la aplicac
 - `Clases/Casilla.java` — Modelo de cada casilla del tablero
 - `Clases/Juego.java` — Lógica del juego
 - `Clases/Tablero.java` — Interfaz gráfica
+- `Clases/Records.java` — Gestor de los records en cada dificultad
 - `src/App.java` — Main
 - `src/Imagenes/` — Recursos gráficos del juego
 

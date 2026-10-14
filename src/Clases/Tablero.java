@@ -4,9 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
 import java.util.HashMap;
-import java.util.Properties;
 
 import Clases.Juego.Resultado;
 
@@ -39,6 +37,7 @@ public class Tablero {
   private final JFrame ventana;
   private final  JComboBox<String> reinicio;
   private final HashMap<String, ImageIcon> cacheImagenes = new HashMap<>();
+  private final Records registroRecords = new Records("records.txt");;
   private JPanel panelBanderillas;
   private JPanel panelSuperior; 
   private JPanel leftPanel;
@@ -69,7 +68,7 @@ public class Tablero {
    */
   public Tablero () {
     //Inicializacion del boton de reinicio
-    reinicio = new JComboBox<>(new String[]{"REINICIAR", "FÁCIL", "NORMAL", "DIFÍCIL"});
+    reinicio = new JComboBox<>(new String[]{"FÁCIL", "NORMAL", "DIFÍCIL"});
     reinicio.setPreferredSize(new Dimension(145, 40));
     reinicio.setFont(new Font("Rockwell", Font.BOLD, 20));
     reinicio.setFocusable(false);
@@ -81,11 +80,10 @@ public class Tablero {
     reinicio.setForeground(Color.WHITE);
     reinicio.addActionListener(e -> {
       switch (reinicio.getSelectedIndex()){
-        case 1: inicializar(Dificultad.FACIL); break;
-        case 2: inicializar(Dificultad.NORMAL); break;
-        case 3: inicializar(Dificultad.DIFICIL); break;
+        case 0: inicializar(Dificultad.FACIL); break;
+        case 1: inicializar(Dificultad.NORMAL); break;
+        case 2: inicializar(Dificultad.DIFICIL); break;
       }; 
-      reinicio.setSelectedIndex(0);
     });
     //Crea un render para que el texto del JComboBox esté centrado
     DefaultListCellRenderer renderer = new DefaultListCellRenderer();
@@ -99,10 +97,6 @@ public class Tablero {
     JButton facil = botonesDificultad(VERDE_CLARITO, "FÁCIL");
     JButton normal = botonesDificultad(AZUL, "NORMAL");
     JButton dificil = botonesDificultad(ROJO, "DIFÍCIL");
-    //ActionsListners
-    facil.addActionListener(e -> inicializar(Dificultad.FACIL));
-    normal.addActionListener(e -> inicializar(Dificultad.NORMAL));
-    dificil.addActionListener(e -> inicializar(Dificultad.DIFICIL));
     //Padding a los botones
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(0, 10, 0, 10); 
@@ -152,6 +146,7 @@ public class Tablero {
     boton.setForeground(Color.BLACK);
     boton.setPreferredSize(new Dimension(120, 30));
     boton.setFocusable(false); //Deshabilitar el enfoque
+    boton.addActionListener(e -> {inicializar(Dificultad.NORMAL); reinicio.setSelectedItem(txt);});
     return boton;
   }
 
@@ -161,7 +156,7 @@ public class Tablero {
    */
   private void inicializar(Dificultad opcion) {
     ventana.getContentPane().removeAll(); //Limpio la ventana
-    if (timer != null){
+    if (timer != null){ //Reiniciar contador si la partida anterior no se ha terminado
       timer.stop();
     }
     dificultad = opcion;
@@ -398,9 +393,7 @@ public class Tablero {
    * Pone el tiempo actual formateado
    */
   private void actualizarTimer(){
-    int min = segundos / 60;
-    int seg = segundos % 60;
-    labelTimer.setText(String.format("%02d:%02d", min, seg));
+    labelTimer.setText(Records.toStr(segundos));
   }
 
   /**
@@ -456,7 +449,6 @@ public class Tablero {
     //Se deja de contar los segundos
     timer.stop();
 
-    String recordActual = getRecord(fin);
     String msg = (fin) ? "¡Has ganado!" : "Has perdido...";
     JDialog dialog = new JDialog(ventana, "Fin de la partida", true);
     JPanel botonesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
@@ -466,9 +458,13 @@ public class Tablero {
     JLabel mensaje = new JLabel(msg, JLabel.CENTER);
     JLabel record = new JLabel("00:00", JLabel.CENTER);
 
-    record.setText(recordActual);
-    if (!fin) {//Caso en el que se ha perdido
+    if (!fin) { //Caso en el que se ha perdido
       labelTimer.setText("___"); //Si se pierde, el tiempo sale "___"
+      record.setText(Records.toStr(registroRecords.getRecord(dificultad)));
+    }
+    else {
+      String mejor = registroRecords.comprobarRecord(dificultad, segundos);
+      record.setText(mejor);
     }
 
     labelTimer.setForeground(Color.BLACK);
@@ -511,60 +507,6 @@ public class Tablero {
     ventana.getContentPane().removeAll(); 
     ventana.getContentPane().setBackground(null);
     inicializar(dificultad);
-  }
-
-  /**
-   * Comprueba cual es el record y si se ha superado. Si se ha superado, tambien modifica o crea el archivo "records.txt"
-   * @param ganado {@code true} si se ha gando la partida, {@code false} si se ha perdido
-   * @return un {@code String} para que lo muestre el {@code JLabel} record
-   */
-  private String getRecord (boolean ganado){
-    Properties records = new Properties();
-    File archivo = new File("records.txt");
-    boolean hayAntiguoRecord;
-    if (archivo.exists()) {
-      try (FileReader fr = new FileReader(archivo)) {
-        records.load(fr);
-      } 
-      catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    String antiguo = records.getProperty(dificultad.name(), "00:00"); // Si no existe, devuelve "00:00" por defecto
-    if (!esTiempoValido(antiguo)){
-      antiguo = "00:00";
-    }
-    hayAntiguoRecord = !antiguo.equals("00:00");
-
-    if (!ganado && !hayAntiguoRecord){
-      antiguo = "___";
-    }
-    else {
-      if (ganado && (antiguo.compareTo(labelTimer.getText()) > 0 || !hayAntiguoRecord)){
-        records.setProperty(dificultad.name(), labelTimer.getText());
-        antiguo = labelTimer.getText();
-        try(FileWriter fw = new FileWriter(archivo)){
-          records.store(fw, null);
-        }
-        catch (IOException e){
-          e.printStackTrace();
-        }
-      }
-    }
-    return antiguo;
-  }
-
-  /**
-   * Comprueba si el record tiene un formato adecuado. El formato es dd:ss {@code Integer} no negativos y con ss < 60
-   * @param record {@code String} a comprobar
-   * @return {@code true} si es valido, {@code false} e.o.c
-   */
-  private boolean esTiempoValido (String record){
-    if (!record.matches("\\d{2}:\\d{2}")) {
-      return false;
-    }
-    String[] partes = record.split(":");
-    return Integer.parseInt(partes[1]) < 60; 
   }
   
   public enum Dificultad{
