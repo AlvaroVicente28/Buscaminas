@@ -37,7 +37,7 @@ public class Tablero {
   private final JFrame ventana;
   private final  JComboBox<String> reinicio;
   private final HashMap<String, ImageIcon> cacheImagenes = new HashMap<>();
-  private final Records registroRecords = new Records("records.txt");;
+  private final Records registroRecords = new Records("records.txt");
   private JPanel panelBanderillas;
   private JPanel panelSuperior; 
   private JPanel leftPanel;
@@ -146,7 +146,7 @@ public class Tablero {
     boton.setForeground(Color.BLACK);
     boton.setPreferredSize(new Dimension(120, 30));
     boton.setFocusable(false); //Deshabilitar el enfoque
-    boton.addActionListener(e -> {inicializar(Dificultad.NORMAL); reinicio.setSelectedItem(txt);});
+    boton.addActionListener(e -> reinicio.setSelectedItem(txt));
     return boton;
   }
 
@@ -285,14 +285,14 @@ public class Tablero {
         despejarCasilla(x, y, num); break;
 
       case HUECO:
-        despejarHuecos(res); break;
+        despejarHuecos(); break;
 
       case DERROTA:
-        despejarHuecos(res);
+        despejarHuecos();
         finPartida(false); break;
       
       case VICTORIA:
-        despejarHuecos(res);
+        despejarHuecos();
         finPartida(true); break;
 
       default: break;
@@ -331,17 +331,13 @@ public class Tablero {
 
   /**
    * Recorre la lista de {@code Casilla} modificadas en un hueco
-   * @param opcion {@code DERROTA}, {@code HUECO} o {@code VICTORIA}
    */
-  private void despejarHuecos(Resultado opcion) { 
+  private void despejarHuecos() { 
     for(Point punto : juego.getList()){
       Casilla casilla = juego.getCasilla(punto.x, punto.y);
       despejarCasilla(punto.x, punto.y, casilla.toString());            
     }
     numBanderillas();
-    if (opcion == Resultado.DERROTA) { //Caso en el que se ha perdido
-      finPartida(false);
-    }
   }
 
   /**
@@ -475,7 +471,6 @@ public class Tablero {
     tiempos.add(labelTimer);
     tiempos.add(record);
 
-    mensaje.setText(msg);
     mensaje.setFont(new Font("Dialog", Font.BOLD, 18));
     mensaje.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
