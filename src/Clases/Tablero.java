@@ -293,6 +293,7 @@ public class Tablero {
       
       case VICTORIA:
         despejarHuecos();
+        desactivarTablero();
         finPartida(true); break;
 
       default: break;
@@ -314,6 +315,19 @@ public class Tablero {
   }
 
   /**
+   * Elimina todos los MouseListners para que esté disabled pero teniendo colores de texto
+   * @param boton a desactivar
+   */
+  private void quitarListeners(JButton boton) {
+    if (boton == null){
+      throw new NullPointerException("El boton es null");
+    }
+    for (MouseListener ml : boton.getMouseListeners()) {
+      boton.removeMouseListener(ml); //Elimino todos los MouseListners para que esté disabled pero teniendo colores de texto
+    }
+  }
+
+  /**
    * Despeja la {@code Casilla} (x,y) y le cambia el {@code Color} y el número a su botón
    * @param x cordenada x
    * @param y coordenada y
@@ -322,11 +336,20 @@ public class Tablero {
   private void despejarCasilla (int x, int y, String num){
     JButton boton = botones[x][y];
     boton.setText(num);
-    for (MouseListener ml : boton.getMouseListeners()) { 
-      boton.removeMouseListener(ml); //Elimino todos los MouseListners para que esté disabled pero teniendo colores de texto
-    }
+    quitarListeners(boton);
     boton.setBackground(getColor(x, y));
     boton.setForeground(addColorText(num));
+  }
+
+  /**
+   * Desactiva todos los botones del tablero
+   */
+  private void desactivarTablero() {
+    for (JButton[] fila : botones) {
+      for (JButton boton : fila) {
+        quitarListeners(boton);
+      }
+    }
   }
 
   /**
@@ -397,11 +420,10 @@ public class Tablero {
    */
   private void numBanderillas(){ 
     int banderillas = juego.getBanderillasRestantes();
-    int decenas = banderillas / 10, unidades = banderillas % 10;
     //Primer numero
-    imagen1.setIcon(getImageIcon(rutas[decenas], 50, 50)); 
+    imagen1.setIcon(getImageIcon(rutas[banderillas / 10], 50, 50)); 
     //Segundo numero
-    imagen2.setIcon(getImageIcon(rutas[unidades], 50, 50)); 
+    imagen2.setIcon(getImageIcon(rutas[banderillas % 10], 50, 50)); 
   }
 
   /**
