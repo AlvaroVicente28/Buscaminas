@@ -252,7 +252,7 @@ public class Juego {
    * Hace visible la {@code Casilla} y aumenta casillasDespejadas
    * @param casilla {@code Casilla} a despejar
    * @return {@code true} si no era visible, {@code false} e.o.c.
-   * @see Casilla.setVisible()
+   * @see Casilla#setVisible()
    */
   private boolean despejarCasilla(Casilla casilla){
     if (casilla == null){
@@ -273,7 +273,7 @@ public class Juego {
    * Expande los huecos vacios. Las casillas depejadas se guardan en un {@code ArrayList}
    * @param fila fila
    * @param columna columna
-   * @see getList()
+   * @see Juego#getList()
    */
   private void expandirHuecos(int fila, int columna) {
     Queue<Point> cola = new LinkedList<>();

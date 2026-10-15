@@ -30,16 +30,17 @@ public class Casilla {
   }
 
   /**
-   * 
-   * @return
+   * Devuelve el número de minas vecinas que tiene la casilla
+   * @return número de minas vecinas
    */
   public int getNum(){
     return minasVecinas;
   }
 
   /**
-   * 
-   * @return
+   * Devuelve el estado de la casilla
+   * @return {@code EstadoCasilla} estado
+   * @see EstadoCasilla
    */
   public EstadoCasilla getEstado(){
     return estado;
