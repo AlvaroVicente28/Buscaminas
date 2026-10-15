@@ -2,16 +2,14 @@ package Clases;
 
 public class Casilla {
   private boolean hayMina;
-  private boolean hayBanderilla;
-  private boolean esVisible;
-  private String num;
+  private int minasVecinas;
+  private EstadoCasilla estado;
   
   //Constructor
   public Casilla() {
     hayMina = false;
-    hayBanderilla = false;
-    esVisible = false;
-    num = "0";
+    minasVecinas = 0;
+    estado = EstadoCasilla.OCULTA;
   }
 
   //Getters
@@ -28,7 +26,23 @@ public class Casilla {
    * @return {@code true} si hay banderilla, {@code false} e.o.c.
    */
   public boolean getBanderilla() {
-    return hayBanderilla;
+    return estado == EstadoCasilla.BANDERILLA;
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public int getNum(){
+    return minasVecinas;
+  }
+
+  /**
+   * 
+   * @return
+   */
+  public EstadoCasilla getEstado(){
+    return estado;
   }
 
   /**
@@ -36,7 +50,7 @@ public class Casilla {
    * @return {@code true} si es vacia, {@code false} e.o.c
    */
   public boolean esVacia(){
-    return num.isEmpty();
+    return minasVecinas == 0;
   }
 
   //Setters
@@ -44,10 +58,10 @@ public class Casilla {
    * Hace visible la casilla
    * @return el valor anterior de esVisible
    */
-  protected boolean setVisible() { //OBS: se podria ver si el toString es "", pero así se entiende mejor
-    boolean aux = esVisible;
-    this.esVisible = true;
-    return aux;
+  protected boolean setVisible() {
+    boolean res = estado == EstadoCasilla.VISIBLE;
+    this.estado = EstadoCasilla.VISIBLE;
+    return res;
   }
 
   /**
@@ -63,7 +77,7 @@ public class Casilla {
    * @param hayBanderilla {@code true} para poner banderilla, {@code false} para quitarla
    */
   protected void setBanderilla(boolean hayBanderilla) {
-    this.hayBanderilla = hayBanderilla;
+    this.estado  = hayBanderilla ? EstadoCasilla.BANDERILLA : EstadoCasilla.OCULTA;
   }
 
   /**
@@ -72,31 +86,22 @@ public class Casilla {
    * Si {@code numero} es 0, se cambia al String vacío
    */
   protected void setNum(int numero) {
-    this.num = (numero == 0) ? "" : numero + "";
+    this.minasVecinas = numero;
   }
 
   /**
    * Marca la casilla como un fallo
    */
   protected void setFallo(){
-    if (hayBanderilla && !hayMina){
-      hayBanderilla = false;
-      num = "X";
+    if (estado == EstadoCasilla.BANDERILLA && !hayMina){
+      estado = EstadoCasilla.FALLO;
     }
   }
 
-  //Presentar con formato
-  @Override
-  public String toString() {
-    if (num.equals("X")){
-      return "❌";
-    }
-    if (hayBanderilla){
-      return "🚩";
-    }
-    if (!esVisible){
-      return "";
-    }
-    return (hayMina) ? "💣" : num;
+  public enum EstadoCasilla{
+    OCULTA,
+    VISIBLE,
+    BANDERILLA,
+    FALLO
   }
 }

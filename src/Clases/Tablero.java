@@ -262,6 +262,9 @@ public class Tablero {
           else if (SwingUtilities.isRightMouseButton(e)){
             manejarClickBanderilla(x, y);
           }
+          else if (SwingUtilities.isMiddleMouseButton(e)){
+            //TODO
+          }
         }
       }
     };  
@@ -280,9 +283,7 @@ public class Tablero {
     }
     switch(res){  //OBS: si res = BANDERILLA no se hace nada 
       case SEGUIR:
-        Casilla casilla = juego.getCasilla(x, y); 
-        String num = casilla.toString();
-        despejarCasilla(x, y, num); break;
+        despejarCasilla(x, y, estadoToStr(juego.getCasilla(x, y))); break;
 
       case HUECO:
         despejarHuecos(); break;
@@ -307,10 +308,30 @@ public class Tablero {
    */
   private void manejarClickBanderilla(int x, int y){ 
     if(juego.clickBanderilla(x, y)) {
-      String str = juego.getCasilla(x, y).getBanderilla() ? "🚩" : "";
+      String str = estadoToStr(juego.getCasilla(x, y));
       botones[x][y].setText(str);
       botones[x][y].setForeground(addColorText(str));
       numBanderillas();
+    }
+  }
+
+  /**
+   * Asigna un String dependiendo del estado de la casilla
+   * @param casilla a convertir en String
+   * @return el String de la {@code casilla}
+   */
+  private String estadoToStr(Casilla casilla){
+    switch(casilla.getEstado()){
+      case FALLO: return "❌";
+      case BANDERILLA: return "🚩";
+      case OCULTA: return "";
+      case VISIBLE: 
+        if (casilla.getHayMina()){
+          return "💣";
+        }
+        int minasVecinas = casilla.getNum();
+        return (minasVecinas == 0) ? "" : minasVecinas + "";
+      default: return null;
     }
   }
 
@@ -358,7 +379,7 @@ public class Tablero {
   private void despejarHuecos() { 
     for(Point punto : juego.getList()){
       Casilla casilla = juego.getCasilla(punto.x, punto.y);
-      despejarCasilla(punto.x, punto.y, casilla.toString());            
+      despejarCasilla(punto.x, punto.y, estadoToStr(casilla));            
     }
     numBanderillas();
   }
