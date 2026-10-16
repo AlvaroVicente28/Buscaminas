@@ -247,20 +247,20 @@ public class Tablero {
 
   /**
    * Funcion auxiliar para distinguir entre click derecho o izquierdo
-   * @param x coordenada x
-   * @param y coordenada y
+   * @param fila coordenada y
+   * @param columna coordenada x
    * @return el {@code MouseAdapter} que gestiona las acciones de click del usuario
    */
-  private MouseAdapter click (int x, int y){
+  private MouseAdapter click (int fila, int columna){
     return new MouseAdapter() {
       @Override
       public void mouseReleased(MouseEvent e) {//Se activa cuando se suelta el boton
         if (e.getComponent().contains(e.getPoint())) { //Comprueba que el click se ha hecho dentro del boton del que se ha iniciado
           if (SwingUtilities.isLeftMouseButton(e)){ 
-            manejarClickDesp(x, y);
+            manejarClickDesp(fila, columna);
           }
           else if (SwingUtilities.isRightMouseButton(e)){
-            manejarClickBanderilla(x, y);
+            manejarClickBanderilla(fila, columna);
           }
           else if (SwingUtilities.isMiddleMouseButton(e)){
             //TODO
@@ -272,18 +272,18 @@ public class Tablero {
 
   /**
    * Manejo del click en modo despejar casilla
-   * @param x coordenada x
-   * @param y coordenada y
+   * @param fila coordenada y
+   * @param columna coordenada x
    */
-  private void manejarClickDesp(int x, int y){
+  private void manejarClickDesp(int fila, int columna){
     boolean primerClick = juego.getPrimerClick();
-    Resultado res = juego.clickDesp(x, y);
+    Resultado res = juego.clickDesp(fila, columna);
     if (primerClick){
       iniciarTimer();
     }
     switch(res){  //OBS: si res = BANDERILLA no se hace nada 
       case SEGUIR:
-        despejarCasilla(x, y, estadoToStr(juego.getCasilla(x, y))); break;
+        despejarCasilla(fila, columna, estadoToStr(juego.getCasilla(fila, columna))); break;
 
       case HUECO:
         despejarHuecos(); break;
@@ -303,14 +303,14 @@ public class Tablero {
 
   /**
    * Manejo del click en modo poner banderilla
-   * @param x coordenada x
-   * @param y coordenada y
+   * @param fila coordenada y
+   * @param columna coordenada x
    */
-  private void manejarClickBanderilla(int x, int y){ 
-    if(juego.clickBanderilla(x, y)) {
-      String str = estadoToStr(juego.getCasilla(x, y));
-      botones[x][y].setText(str);
-      botones[x][y].setForeground(addColorText(str));
+  private void manejarClickBanderilla(int fila, int columna){ 
+    if(juego.clickBanderilla(fila, columna)) {
+      String str = estadoToStr(juego.getCasilla(fila, columna));
+      botones[fila][columna].setText(str);
+      botones[fila][columna].setForeground(addColorText(str));
       numBanderillas();
     }
   }
@@ -350,15 +350,15 @@ public class Tablero {
 
   /**
    * Despeja la {@code Casilla} (x,y) y le cambia el {@code Color} y el número a su botón
-   * @param x cordenada x
-   * @param y coordenada y
+   * @param fila cordenada y
+   * @param columna coordenada x
    * @param num número de la {@code Casilla} a poner en el botón
    */
-  private void despejarCasilla (int x, int y, String num){
-    JButton boton = botones[x][y];
+  private void despejarCasilla (int fila, int columna, String num){
+    JButton boton = botones[fila][columna];
     boton.setText(num);
     quitarListeners(boton);
-    boton.setBackground(getColor(x, y));
+    boton.setBackground(getColor(fila, columna));
     boton.setForeground(addColorText(num));
   }
 
@@ -378,8 +378,8 @@ public class Tablero {
    */
   private void despejarHuecos() { 
     for(Point punto : juego.getList()){
-      Casilla casilla = juego.getCasilla(punto.x, punto.y);
-      despejarCasilla(punto.x, punto.y, estadoToStr(casilla));            
+      Casilla casilla = juego.getCasilla(punto.y, punto.x);
+      despejarCasilla(punto.y, punto.x, estadoToStr(casilla));            
     }
     numBanderillas();
   }
@@ -390,9 +390,9 @@ public class Tablero {
    * @param y coordenada y
    * @return {@code Color} de la casilla (x,y)
    */
-  private Color getColor (int x, int y) { 
-    Casilla casilla = juego.getCasilla(x, y);
-    if (casilla.getHayMina() || casilla.getBanderilla()) {
+  private Color getColor (int y, int x) { 
+    Casilla casilla = juego.getCasilla(y, x);
+    if (casilla.getHayMina() || casilla.getBanderilla() || casilla.getFallo()) {
       return (x + y) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO;
     }
     return (x + y) % 2 == 0 ? MARRON_CLARITO : MARRON_OSCURO;

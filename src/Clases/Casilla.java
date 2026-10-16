@@ -47,6 +47,22 @@ public class Casilla {
   }
 
   /**
+   * Comprueba si la casilla es visible
+   * @return {@code true} si es visible, {@code false} e.o.c.
+   */
+  public boolean getVisible(){
+    return estado == EstadoCasilla.VISIBLE;
+  }
+
+  /**
+   * Comprueba si la casilla es un fallo
+   * @return {@code true} si es un fallo, {@code false} e.o.c.
+   */
+  public boolean getFallo(){
+    return estado == EstadoCasilla.FALLO;
+  }
+
+  /**
    * Comprueba si la casilla es un hueco
    * @return {@code true} si es vacia, {@code false} e.o.c
    */
@@ -56,13 +72,15 @@ public class Casilla {
 
   //Setters
   /**
-   * Hace visible la casilla
-   * @return el valor anterior de esVisible
+   * Hace visible la casilla si su estado es {@code EstadoCasilla.OCULTA}
+   * @return {@code true} si la casilla se ha hecho visible, {@code false} e.o.c
    */
-  protected boolean setVisible() {
-    boolean res = estado == EstadoCasilla.VISIBLE;
-    this.estado = EstadoCasilla.VISIBLE;
-    return res;
+  protected boolean setVisible() { 
+    if (estado == EstadoCasilla.OCULTA){
+      estado = EstadoCasilla.VISIBLE;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -91,11 +109,16 @@ public class Casilla {
   }
 
   /**
-   * Marca la casilla como un fallo
+   * Marca la casilla si tiene un fallo
    */
-  protected void setFallo(){
-    if (estado == EstadoCasilla.BANDERILLA && !hayMina){
-      estado = EstadoCasilla.FALLO;
+  protected void setFallo(){ 
+    if (estado == EstadoCasilla.BANDERILLA){
+      if (!hayMina){
+        estado = EstadoCasilla.FALLO;
+      }
+    }
+    else if (estado == EstadoCasilla.OCULTA){
+      estado = EstadoCasilla.VISIBLE;
     }
   }
 
