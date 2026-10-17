@@ -87,8 +87,8 @@ public class Records {
    */
   public enum Dificultad {
     FACIL(9, 10, 67), 
-    NORMAL(14, 40, 43), 
-    DIFICIL(20, 99, 30);
+    NORMAL(16, 40, 38), 
+    DIFICIL(22, 99, 28);
 
     public final int tamano, minas, celda;
     
