@@ -274,7 +274,21 @@ public class Tablero {
   private MouseAdapter click (int fila, int columna){
     return new MouseAdapter() {
       @Override
+      public void mousePressed(MouseEvent e) { 
+        if (SwingUtilities.isRightMouseButton(e)) { 
+          ButtonModel model = ((JButton) e.getComponent()).getModel();
+          model.setArmed(true);
+          model.setPressed(true);
+        }
+      }
+
+      @Override
       public void mouseReleased(MouseEvent e) {//Se activa cuando se suelta el boton
+        if (SwingUtilities.isRightMouseButton(e)) {
+          ButtonModel model = ((JButton) e.getComponent()).getModel();
+          model.setArmed(false); 
+          model.setPressed(false);
+        }
         if (e.getComponent().contains(e.getPoint())) { //Comprueba que el click se ha hecho dentro del boton del que se ha iniciado
           if (SwingUtilities.isLeftMouseButton(e)){ 
             manejarClickDesp(fila, columna);
