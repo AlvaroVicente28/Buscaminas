@@ -344,6 +344,18 @@ public class Juego {
     return terminado;
   }
 
+  @Override 
+  public String toString(){
+    String res = "";
+    for (int i = 0; i < tablero.length; i++){
+      for(int j = 0; j < tablero[i].length; j++){
+        res += tablero[i][j].toString() + "\t";
+      }
+      res += "\n";
+    }
+    return res;
+  }
+
   public enum Resultado {
     DERROTA,
     VICTORIA,

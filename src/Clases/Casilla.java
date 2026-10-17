@@ -122,6 +122,16 @@ public class Casilla {
     }
   }
 
+  @Override 
+  public String toString(){
+    switch(estado){
+      case OCULTA: return "#";
+      case FALLO: return "X";
+      case BANDERILLA: return "F";
+      default: return hayMina ? "*" : minasVecinas + "";
+    }
+  }
+
   public enum EstadoCasilla{
     OCULTA,
     VISIBLE,
