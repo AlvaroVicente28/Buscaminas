@@ -228,14 +228,9 @@ public class Tablero {
     for (int i = 0; i < tamano; i++){
       for (int j = 0; j < tamano; j++){
         final int fila = i, column = j;    //Necesario que sean final para usar el listener
-        JButton boton = botones[i][j] = new JButton();
-        boton.setModel(new ModeloCasilla());
+        JButton boton = botones[i][j] = botonTablero();
         boton.setBackground((i + j) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO); //Color de las casillas
-        boton.setFocusable(false); 
-        boton.setMargin(new Insets(0, 0, 0, 0)); //El boton no tine margenes, ocupa toda la casilla
         boton.addMouseListener(click(fila, column));
-        boton.setBorderPainted(false); //Le quito el borde para que no parezca un botón
-        boton.setFont(new Font("Dialog", Font.BOLD, 20));
         panelPrincipal.add(boton);
       }
     }
@@ -244,6 +239,30 @@ public class Tablero {
     ventana.add(panelSuperior, BorderLayout.NORTH);
     ventana.add(contenedor, BorderLayout.CENTER);
     ventana.revalidate();           //Actualiza la ventana
+  }
+
+  /**
+   * Funcion auxiliar para crear los botones del tablero de juego
+   * @return el {@code JButton} creado con rollOver
+   */
+  private JButton botonTablero(){
+    JButton boton = new JButton() {
+      @Override
+      public Color getBackground() { //Añade rollOver
+        Color color = super.getBackground();
+        ButtonModel model = getModel();
+        if (color != null && model.isRollover() && !model.isPressed()) {
+          return aclarar(color, 0.15f);
+        }
+        return color;
+      }
+    };
+    boton.setModel(new ModeloCasilla());
+    boton.setFocusable(false); 
+    boton.setMargin(new Insets(0, 0, 0, 0)); //El boton no tine margenes, ocupa toda la casilla
+    boton.setBorderPainted(false); //Le quito el borde para que no parezca un botón
+    boton.setFont(new Font("Dialog", Font.BOLD, 20));
+    return boton;
   }
 
   /**
@@ -415,6 +434,19 @@ public class Tablero {
       return (x + y) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO;
     }
     return (x + y) % 2 == 0 ? MARRON_CLARITO : MARRON_OSCURO;
+  }
+
+  /**
+   * Aclara un color
+   * @param c color original
+   * @param factor entre 0 (igual) y 1 (blanco)
+   * @return el {@code Color} aclarado
+   */
+  private static Color aclarar(Color c, float factor) {
+    int r = (int) (c.getRed()   + (255 - c.getRed())   * factor);
+    int g = (int) (c.getGreen() + (255 - c.getGreen()) * factor);
+    int b = (int) (c.getBlue()  + (255 - c.getBlue())  * factor);
+    return new Color(r, g, b);
   }
 
   /**
