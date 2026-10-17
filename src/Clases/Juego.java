@@ -11,6 +11,7 @@ public class Juego {
   private final int minas;
   private int banderillas;
   private boolean primerClick = true;
+  private boolean terminado = false;
   private int casillasDespejadas;
   private ArrayList<Point> list;
 
@@ -20,7 +21,6 @@ public class Juego {
    * @param minas número de minas
    */
   public Juego(int tamano, int minas) {
-    casillasFin = tamano * tamano - minas;
     if (minas <= 0){
       throw new IllegalArgumentException("Parámetros de juego inválidos: " + minas + " <= 0");
     }
@@ -31,6 +31,7 @@ public class Juego {
       throw new IllegalArgumentException("Parámetros de juego inválidos: No hay espacio para las minas (minas + 9 > tamano * tamano)");
     }
     this.minas = minas;
+    casillasFin = tamano * tamano - minas;
     banderillas = minas;
     casillasDespejadas = 0;
     list = new ArrayList<>();
@@ -49,10 +50,11 @@ public class Juego {
    * @return {@code Resultado} dependiendo del resultado
    */
   public Resultado clickDesp(int fila, int columna) {
+    list.clear();
     Casilla casilla = getCasilla(fila, columna); 
-    //Caso en el que se pulsa una casilla con banderilla
-    if (casilla.getBanderilla()){
-      return Resultado.BANDERILLA;
+    //Caso en el que se pulsa una casilla no valida para despejar
+    if (casilla.esVisible() || casilla.getBanderilla() || terminado){
+      return Resultado.NADA;
     }
     //Caso en el que se pulsa una mina
     if (derrota(casilla)){
@@ -67,7 +69,6 @@ public class Juego {
       ponerNumeros();
     }
     despejarCasilla(casilla);
-    list.clear();
     list.add(new Point(columna, fila));
     //Caso en el que se pulsa una casilla con un hueco
     if (casilla.esVacia()){
@@ -89,16 +90,17 @@ public class Juego {
    * Click para poner o quitar una banderilla de una {@code Casilla}
    * @param fila coordenada y
    * @param columna coordenada x
-   * @return
+   * @return {@code true} si pone o quita la banderilla, {@code false} e.o.c
    */
   public boolean clickBanderilla(int fila, int columna) {
-    //No se pone banderilla si no se ha despejado con el primer click
-    if (primerClick){ 
+    Casilla casilla = getCasilla(fila, columna);
+    //No se pone banderilla si no se ha despejado con el primer click o si la partida ha terminado
+    if (primerClick || casilla.esVisible() || terminado){ 
       return false;
     }
     //Caso en el que la casilla ya tiene una banderilla
-    if (tablero[fila][columna].getBanderilla()) {
-      tablero[fila][columna].setBanderilla(false);
+    if (casilla.getBanderilla()) {
+      casilla.setBanderilla(false);
       banderillas++;
       return true;
     }
@@ -107,7 +109,7 @@ public class Juego {
       return false;
     }
     //Caso en el que la casilla no tiene una banderilla 
-    tablero[fila][columna].setBanderilla(true);
+    casilla.setBanderilla(true);
     banderillas--;
     return true;
   }
@@ -116,7 +118,7 @@ public class Juego {
    * Devuelve la {@code Casilla} en la posicion (x,y)
    * @param fila coordenada y
    * @param columna coordenada x
-   * @return la {@code Casilla} en la posicion (x,y) si es visible
+   * @return la {@code Casilla} en la posicion (x,y)
    * @throws IndexOutOfBoundsException
    */
   protected Casilla getCasilla (int fila, int columna) {
@@ -131,7 +133,11 @@ public class Juego {
    * @return {@code true} si se ha ganado, {@code false} e.o.c
    */
   private boolean victoria (){
-    return casillasDespejadas == casillasFin;
+    if (casillasDespejadas == casillasFin){
+      terminado = true;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -139,11 +145,9 @@ public class Juego {
    * @return {@code true} si se ha perdido, {@code false} e.o.c
    */
   private boolean derrota (Casilla casilla){
-    if (casilla == null){
-      throw new NullPointerException("La casilla es null");
-    }
     if (casilla.getHayMina()) {
       despejarTablero();
+      terminado = true;
       return true;
     }
     return false;
@@ -160,6 +164,24 @@ public class Juego {
   }
 
   /**
+   * Calcula las coordenadas de los vecinos de la {@code Casilla} (x,y)
+   * @param fila coordenada y
+   * @param columna coordenada x
+   * @return un {@code ArrayList<Point>} con las coordenadas de los vecinos de (x,y)
+   */
+  private ArrayList<Point> puntosVecinos (int fila, int columna){
+    ArrayList<Point> res = new ArrayList<>(); 
+    for (int i = -1; i <= 1; i++){
+      for (int j = -1; j <= 1; j++){
+        if (esCasillaValida(fila + i, columna + j)){
+          res.add(new Point(columna + j, fila + i));
+        }
+      }
+    }
+    return res;
+  }
+
+  /**
    * Calcula los vecinos de la {@code Casilla} (x,y)
    * @param fila coordenada y
    * @param columna coordenada x
@@ -167,12 +189,8 @@ public class Juego {
    */
   private ArrayList<Casilla> vecinos (int fila, int columna){
     ArrayList<Casilla> res = new ArrayList<>(); 
-    for (int i = -1; i <= 1; i++){
-      for (int j = -1; j <= 1; j++){
-        if (esCasillaValida(fila + i, columna + j)){
-          res.add(tablero[fila + i][columna + j]);
-        }
-      }
+    for (Point punto : puntosVecinos(fila, columna)){
+      res.add(tablero[punto.y][punto.x]);
     }
     return res;
   }
@@ -195,7 +213,7 @@ public class Juego {
   private void ponerMinas() {
     for (int i = 0; i < minas;){
       int fila = (int)(Math.random() * tablero.length);
-      int columna = (int)(Math.random() * tablero.length);
+      int columna = (int)(Math.random() * tablero[0].length);
       if (!tablero[fila][columna].getHayMina()) { //Casilla sin mina
         tablero[fila][columna].setMina(true);
         i++;
@@ -240,7 +258,7 @@ public class Juego {
     list.clear();
     for (int i = 0; i < tablero.length; i++){
       for (int j = 0; j < tablero[i].length; j++){
-        if (!tablero[i][j].getVisible()){
+        if (!tablero[i][j].esVisible()){
           list.add(new Point(j, i));
           tablero[i][j].setFallo(); //Caso en el que se haya puesto una banderilla incorrecta
         }
@@ -255,9 +273,6 @@ public class Juego {
    * @see Casilla#setVisible()
    */
   private boolean despejarCasilla(Casilla casilla){
-    if (casilla == null){
-      throw new NullPointerException("La casilla es null");
-    }
     if (casilla.getBanderilla()){
       casilla.setBanderilla(false);
       banderillas++;
@@ -321,11 +336,19 @@ public class Juego {
     return banderillas;
   }
 
+  /**
+   * Getter de terminado
+   * @return {@code true} si ha terminado la partida, {@code false} e.o.c
+   */
+  public boolean haTerminado(){
+    return terminado;
+  }
+
   public enum Resultado {
     DERROTA,
     VICTORIA,
     HUECO,
     SEGUIR,
-    BANDERILLA
+    NADA
   }
 }

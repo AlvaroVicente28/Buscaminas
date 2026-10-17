@@ -50,7 +50,7 @@ public class Casilla {
    * Comprueba si la casilla es visible
    * @return {@code true} si es visible, {@code false} e.o.c.
    */
-  public boolean getVisible(){
+  public boolean esVisible(){
     return estado == EstadoCasilla.VISIBLE;
   }
 

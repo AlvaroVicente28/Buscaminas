@@ -281,7 +281,7 @@ public class Tablero {
     if (primerClick){
       iniciarTimer();
     }
-    switch(res){  //OBS: si res = BANDERILLA no se hace nada 
+    switch(res){
       case SEGUIR:
         despejarCasilla(fila, columna, estadoToStr(juego.getCasilla(fila, columna))); break;
 
