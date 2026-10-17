@@ -57,7 +57,7 @@ public class Juego {
     list.clear();
     Casilla casilla = getCasilla(fila, columna); 
     //Caso en el que se pulsa una casilla no valida para despejar
-    if (casilla.esVisible() || casilla.getBanderilla() || terminado){
+    if (!casilla.esOculta() || terminado){
       return Resultado.NADA;
     }
     //Caso en el que se pulsa una mina
@@ -103,7 +103,7 @@ public class Juego {
       return false;
     }
     //Caso en el que la casilla ya tiene una banderilla
-    if (casilla.getBanderilla()) {
+    if (casilla.esBanderilla()) {
       casilla.setBanderilla(false);
       banderillas++;
       return true;
@@ -136,8 +136,8 @@ public class Juego {
     }
     for (Point puntoVecino : puntosVecinos(fila, columna)){
       Casilla vecina = tablero[puntoVecino.y][puntoVecino.x];
-      if (!vecina.getBanderilla() && !vecina.esVisible()){
-        if (derrota(vecina)){ //TODO
+      if (vecina.esOculta()){
+        if (derrota(vecina)){
           return Resultado.DERROTA;
         }
         list.add(new Point(puntoVecino.x, puntoVecino.y));
@@ -159,7 +159,7 @@ public class Juego {
   private int contarBanderillas(int fila, int columna){
     int res = 0;
     for (Casilla casilla : vecinos(fila, columna)){
-      if (casilla.getBanderilla()){
+      if (casilla.esBanderilla()){
         res++;
       }
     }
@@ -197,7 +197,7 @@ public class Juego {
    * @return {@code true} si se ha perdido, {@code false} e.o.c
    */
   private boolean derrota (Casilla casilla){
-    if (casilla.getHayMina()) {
+    if (casilla.hayMina()) {
       despejarTablero();
       terminado = true;
       return true;
@@ -266,7 +266,7 @@ public class Juego {
     for (int i = 0; i < minas;){
       int fila = (int)(Math.random() * tablero.length);
       int columna = (int)(Math.random() * tablero[0].length);
-      if (!tablero[fila][columna].getHayMina()) { //Casilla sin mina
+      if (!tablero[fila][columna].hayMina()) { //Casilla sin mina
         tablero[fila][columna].setMina(true);
         i++;
       }
@@ -280,7 +280,7 @@ public class Juego {
   private void ponerNumeros() {
     for (int i = 0; i < tablero.length; i++){
       for (int j = 0; j < tablero[i].length; j++){
-        if (!tablero[i][j].getHayMina()){ //No hay mina
+        if (!tablero[i][j].hayMina()){ //No hay mina
           tablero[i][j].setNum(contarMinas(i, j));
         }
       }
@@ -296,7 +296,7 @@ public class Juego {
   private int contarMinas(int fila, int columna) {
     int res = 0;
     for (Casilla casilla : vecinos(fila, columna)){
-      if (casilla.getHayMina()){
+      if (casilla.hayMina()){
         res++;
       }
     }
@@ -307,7 +307,6 @@ public class Juego {
    * Hace visible todo el tablero
    */
   private void despejarTablero() {
-    list.clear();
     for (int i = 0; i < tablero.length; i++){
       for (int j = 0; j < tablero[i].length; j++){
         if (!tablero[i][j].esVisible()){
@@ -325,7 +324,7 @@ public class Juego {
    * @see Casilla#setVisible()
    */
   private boolean despejarCasilla(Casilla casilla){
-    if (casilla.getBanderilla()){
+    if (casilla.esBanderilla()){
       casilla.setBanderilla(false);
       banderillas++;
     }
@@ -384,7 +383,7 @@ public class Juego {
    * Getter de las banderillas
    * @return nº de banderillas restantes
    */
-  public int getBanderillasRestantes() {
+  public int esBanderillasRestantes() {
     return banderillas;
   }
 

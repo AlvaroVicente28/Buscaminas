@@ -134,7 +134,7 @@ public class Tablero {
   }
 
   /**
-   * Funcion auxiliar para crear los botones de las dificultades
+   * Función auxiliar para crear los botones de las dificultades
    * @param color {@code Color} del botón
    * @param txt texto del botón
    * @return el nuevo {@code JButton}
@@ -242,7 +242,7 @@ public class Tablero {
   }
 
   /**
-   * Funcion auxiliar para crear los botones del tablero de juego
+   * Función auxiliar para crear los botones del tablero de juego
    * @return el {@code JButton} creado con rollOver
    */
   private JButton botonTablero(){
@@ -266,7 +266,28 @@ public class Tablero {
   }
 
   /**
-   * Funcion auxiliar para distinguir entre click derecho, izquierdo o central
+   * Comprueba si el boton está en un estado clickeable para el botón del ratón pulsado
+   * @param e {@code MouseEvent} para saber qué botón del ratón se ha pulsado
+   * @param fila ccordenada y
+   * @param columna coordenada x
+   * @return {@code true} si se puede clickar, {@code false} e.o.c.
+   */
+  private boolean esClickeable(MouseEvent e, int fila, int columna){
+    Casilla casilla = juego.getCasilla(fila, columna);
+    if (SwingUtilities.isLeftMouseButton(e)){
+      return  casilla.esOculta();
+    }
+    if (SwingUtilities.isRightMouseButton(e)){
+      return casilla.esOculta() || casilla.esBanderilla();
+    }
+    if (SwingUtilities.isMiddleMouseButton(e)){
+      return juego.getCasilla(fila, columna).esNumero();
+    }
+    return false;
+  }
+
+  /**
+   * Función auxiliar para distinguir entre click derecho, izquierdo o central
    * @param fila coordenada y
    * @param columna coordenada x
    * @return el {@code MouseAdapter} que gestiona las acciones de click del usuario
@@ -274,21 +295,14 @@ public class Tablero {
   private MouseAdapter click (int fila, int columna){
     return new MouseAdapter() {
       @Override
-      public void mousePressed(MouseEvent e) { 
-        if (SwingUtilities.isRightMouseButton(e)) { 
-          ButtonModel model = ((JButton) e.getComponent()).getModel();
-          model.setArmed(true);
-          model.setPressed(true);
-        }
+      public void mousePressed(MouseEvent e) { //Se activa cuando se pulsa el boton con el click derecho
+        boolean aux = esClickeable(e, fila, columna);
+        ((ModeloCasilla) ((JButton) e.getComponent()).getModel()).pulsar(aux);
       }
 
       @Override
       public void mouseReleased(MouseEvent e) {//Se activa cuando se suelta el boton
-        if (SwingUtilities.isRightMouseButton(e)) {
-          ButtonModel model = ((JButton) e.getComponent()).getModel();
-          model.setArmed(false); 
-          model.setPressed(false);
-        }
+        ((ModeloCasilla) ((JButton) e.getComponent()).getModel()).pulsar(false);
         if (e.getComponent().contains(e.getPoint())) { //Comprueba que el click se ha hecho dentro del boton del que se ha iniciado
           if (SwingUtilities.isLeftMouseButton(e)){ 
             manejarClickDesp(fila, columna);
@@ -316,12 +330,13 @@ public class Tablero {
       iniciarTimer();
     }
     switch(res){
-      case SEGUIR: despejarCasilla(fila, columna, estadoToStr(juego.getCasilla(fila, columna))); break;
+      case SEGUIR: despejarCasilla(fila, columna); break;
 
       case HUECO: despejarHuecos(); break;
 
       case DERROTA:
         despejarHuecos();
+        desactivarTablero();
         finPartida(false); break;
       
       case VICTORIA:
@@ -340,9 +355,7 @@ public class Tablero {
    */
   private void manejarClickBanderilla(int fila, int columna){ 
     if(juego.clickBanderilla(fila, columna)) {
-      String str = estadoToStr(juego.getCasilla(fila, columna));
-      botones[fila][columna].setText(str);
-      botones[fila][columna].setForeground(addColorText(str));
+      pintarCasilla(fila, columna);
       numBanderillas();
     }
   }
@@ -359,6 +372,7 @@ public class Tablero {
 
       case DERROTA: 
         despejarHuecos(); 
+        desactivarTablero();
         finPartida(false); break;
 
       case VICTORIA: 
@@ -381,7 +395,7 @@ public class Tablero {
       case BANDERILLA: return "🚩";
       case OCULTA: return "";
       case VISIBLE: 
-        if (casilla.getHayMina()){
+        if (casilla.hayMina()){
           return "💣";
         }
         int minasVecinas = casilla.getNum();
@@ -391,27 +405,28 @@ public class Tablero {
   }
 
   /**
-   * Elimina todos los MouseListners para que esté disabled pero teniendo colores de texto
-   * @param boton a desactivar
+   * Función auxiliar para pintar los botones tras una jugada
+   * @param fila coordenada y
+   * @param columna coordenada x
    */
-  // private void quitarListeners(JButton boton) {
-  //   for (MouseListener ml : boton.getMouseListeners()) {
-  //     boton.removeMouseListener(ml); //Elimino todos los MouseListners para que esté disabled pero teniendo colores de texto
-  //   }
-  // }
+  private void pintarCasilla(int fila, int columna) {
+    JButton boton = botones[fila][columna];
+    String txt = estadoToStr(juego.getCasilla(fila, columna));
+    boton.setText(txt);
+    boton.setForeground(addColorText(txt));
+  }
 
   /**
    * Despeja la {@code Casilla} (x,y) y le cambia el {@code Color} y el número a su botón
    * @param fila cordenada y
    * @param columna coordenada x
-   * @param num número de la {@code Casilla} a poner en el botón
    */
-  private void despejarCasilla (int fila, int columna, String num){
-    JButton boton = botones[fila][columna];
-    boton.setText(num);
-    ((ModeloCasilla) boton.getModel()).bloquear();
-    boton.setBackground(getColor(fila, columna));
-    boton.setForeground(addColorText(num));
+  private void despejarCasilla (int fila, int columna){
+    pintarCasilla(fila, columna);
+    botones[fila][columna].setBackground(getColor(fila, columna));
+    if (juego.getCasilla(fila, columna).esVacia()){
+      ((ModeloCasilla) botones[fila][columna].getModel()).bloquear();
+    }
   }
 
   /**
@@ -430,8 +445,7 @@ public class Tablero {
    */
   private void despejarHuecos() { 
     for(Point punto : juego.getList()){
-      Casilla casilla = juego.getCasilla(punto.y, punto.x);
-      despejarCasilla(punto.y, punto.x, estadoToStr(casilla));            
+      despejarCasilla(punto.y, punto.x);            
     }
     numBanderillas();
   }
@@ -444,7 +458,7 @@ public class Tablero {
    */
   private Color getColor (int y, int x) { 
     Casilla casilla = juego.getCasilla(y, x);
-    if (casilla.getHayMina() || casilla.getBanderilla() || casilla.getFallo()) {
+    if (casilla.hayMina() || casilla.esBanderilla() || casilla.esFallo()) {
       return (x + y) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO;
     }
     return (x + y) % 2 == 0 ? MARRON_CLARITO : MARRON_OSCURO;
@@ -505,7 +519,7 @@ public class Tablero {
    * Pone las imagenes que corresponda con el numero de banderillas restantes
    */
   private void numBanderillas(){ 
-    int banderillas = juego.getBanderillasRestantes();
+    int banderillas = juego.esBanderillasRestantes();
     //Primer numero
     imagen1.setIcon(getImageIcon(rutas[banderillas / 10], 50, 50)); 
     //Segundo numero
@@ -613,20 +627,27 @@ public class Tablero {
   }
   
   /**
-   * Modelo de botón que deja de reaccionar (hover/pulsado) cuando está bloqueado
+   * Modelo de botón que deja de reaccionar cuando está bloqueado
    */
   private static class ModeloCasilla extends DefaultButtonModel { //OBS: constructor por defecto de java (llama a super())
     private boolean bloqueado = false;
 
-    protected boolean isBloqueado() {
-      return bloqueado;
+    /**
+     * Bloquea, desactivando tanto el rollover como el armed y el pressed e impide cambiarlo de vuelta
+     */
+    protected void bloquear() {
+      setRollover(false);
+      pulsar(false);
+      bloqueado = true;
     }
 
-    protected void bloquear() {
-      super.setRollover(false);
-      super.setArmed(false);
-      super.setPressed(false);
-      bloqueado = true;
+    /**
+     * Quita o pone el armed y el pressed
+     * @param activar
+     */
+    public void pulsar(boolean activar){
+      setArmed(activar);
+      setPressed(activar);
     }
 
     @Override public void setRollover(boolean b) { 

@@ -17,7 +17,7 @@ public class Casilla {
    * Comprueba si la casilla tiene una mina
    * @return {@code true} si hay casilla, {@code false} e.o.c.
    */
-  protected boolean getHayMina() {
+  protected boolean hayMina() {
     return hayMina;
   }
 
@@ -25,7 +25,7 @@ public class Casilla {
    * Comprueba si la casilla tiene una banderilla
    * @return {@code true} si hay banderilla, {@code false} e.o.c.
    */
-  public boolean getBanderilla() {
+  public boolean esBanderilla() {
     return estado == EstadoCasilla.BANDERILLA;
   }
 
@@ -55,10 +55,18 @@ public class Casilla {
   }
 
   /**
+   * Comprueba si la casilla está oculta
+   * @return {@code true} si está oculta, {@code false} e.o.c.
+   */
+  public boolean esOculta(){
+    return estado == EstadoCasilla.OCULTA;
+  }
+
+  /**
    * Comprueba si la casilla es un fallo
    * @return {@code true} si es un fallo, {@code false} e.o.c.
    */
-  public boolean getFallo(){
+  public boolean esFallo(){
     return estado == EstadoCasilla.FALLO;
   }
 
@@ -68,6 +76,14 @@ public class Casilla {
    */
   public boolean esVacia(){
     return minasVecinas == 0;
+  }
+
+  /**
+   * Comprueba si una casilla es visible y no vacía
+   * @return {@code true} si es un número, {@code false} e.o.c
+   */
+  public boolean esNumero(){
+    return estado == EstadoCasilla.VISIBLE && !esVacia();
   }
 
   //Setters
@@ -96,15 +112,16 @@ public class Casilla {
    * @param hayBanderilla {@code true} para poner banderilla, {@code false} para quitarla
    */
   protected void setBanderilla(boolean hayBanderilla) {
-    this.estado  = hayBanderilla ? EstadoCasilla.BANDERILLA : EstadoCasilla.OCULTA;
+    if (esOculta() || esBanderilla()){
+      this.estado = hayBanderilla ? EstadoCasilla.BANDERILLA : EstadoCasilla.OCULTA;
+    }
   }
 
   /**
    * Cambia el número asociado a la casilla
    * @param numero nuevo número de la casilla
-   * Si {@code numero} es 0, se cambia al String vacío
    */
-  protected void setNum(int numero) {
+  protected void setNum (int numero) {
     this.minasVecinas = numero;
   }
 
