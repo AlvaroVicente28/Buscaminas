@@ -47,7 +47,11 @@ public class Juego {
    * Despejar la {@code Casilla} (x,y)
    * @param fila coordenada y
    * @param columna coordenada x
-   * @return {@code Resultado} dependiendo del resultado
+   * @return {@code Resultado.NADA} si no se ha hecho nada <br>
+   * {@code Resultado.DERROTA} si se ha despejado una mina <br>
+   * {@code Resultado.VICTORIA} si se ha ganado la partida <br>
+   * {@code Resultado.SEGUIR} si solo se ha despejado una casilla <br>
+   * {@code Resultado.HUECO} si se ha despejado varias casillas al pulsar un hueco
    */
   public Resultado clickDesp(int fila, int columna) {
     list.clear();
@@ -112,6 +116,54 @@ public class Juego {
     casilla.setBanderilla(true);
     banderillas--;
     return true;
+  }
+
+  /**
+   * Click para despejar adyacentes si la casilla (x,y) ya tiene todas sus minas localizadas
+   * @param fila coordenada y
+   * @param columna coordenada x
+   * @return {@code Resultado.NADA} si no se ha hecho nada <br>
+   * {@code Resultado.DERROTA} si se ha despejado una mina <br>
+   * {@code Resultado.VICTORIA} si se ha ganado la partida <br>
+   * {@code Resultado.HUECO} si se ha despejado alguna casilla
+   */
+  public Resultado clickCentral(int fila, int columna){
+    Casilla casilla = getCasilla(fila, columna);
+    int num = casilla.getNum();
+    list.clear();
+    if (!casilla.esVisible() || num == 0 || num != contarBanderillas(fila, columna) || terminado){
+      return Resultado.NADA;
+    }
+    for (Point puntoVecino : puntosVecinos(fila, columna)){
+      Casilla vecina = tablero[puntoVecino.y][puntoVecino.x];
+      if (!vecina.getBanderilla() && !vecina.esVisible()){
+        if (derrota(vecina)){ //TODO
+          return Resultado.DERROTA;
+        }
+        list.add(new Point(puntoVecino.x, puntoVecino.y));
+        despejarCasilla(vecina);
+        if (vecina.esVacia()){
+          expandirHuecos(puntoVecino.y, puntoVecino.x);
+        }
+      }
+    }
+    return (victoria()) ? Resultado.VICTORIA : Resultado.HUECO;
+  }
+
+  /**
+   * Cuenta el número de casillas vecinas a (x,y) que tengan banderilla
+   * @param fila coordenada y
+   * @param columna coordenada x
+   * @return el número de banderillas vecinas
+   */
+  private int contarBanderillas(int fila, int columna){
+    int res = 0;
+    for (Casilla casilla : vecinos(fila, columna)){
+      if (casilla.getBanderilla()){
+        res++;
+      }
+    }
+    return res;
   }
 
   /**
@@ -356,6 +408,9 @@ public class Juego {
     return res;
   }
 
+  /**
+   * Posibles estados de la partida tras hacer una jugada
+   */
   public enum Resultado {
     DERROTA,
     VICTORIA,

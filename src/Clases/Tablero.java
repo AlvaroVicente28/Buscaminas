@@ -14,12 +14,12 @@ public class Tablero {
   private static final int MINAS_DIFICIL = 99;
 
   private static final int TAMANO_FACIL = 9;
-  private static final int TAMANO_NORMAL = 14;
-  private static final int TAMANO_DIFICIL = 20;
+  private static final int TAMANO_NORMAL = 16;
+  private static final int TAMANO_DIFICIL = 22;
 
   private static final int CELDA_FACIL = 67;
-  private static final int CELDA_NORMAL = 43;
-  private static final int CELDA_DIFICIL = 30;
+  private static final int CELDA_NORMAL = 38;
+  private static final int CELDA_DIFICIL = 28;
 
   private static final Color VERDE_CLARITO = new Color(93, 209, 73);
   private static final Color VERDE_OSCURO = new Color(61, 167, 42);
@@ -229,6 +229,7 @@ public class Tablero {
       for (int j = 0; j < tamano; j++){
         final int fila = i, column = j;    //Necesario que sean final para usar el listener
         JButton boton = botones[i][j] = new JButton();
+        boton.setModel(new ModeloCasilla());
         boton.setBackground((i + j) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO); //Color de las casillas
         boton.setFocusable(false); 
         boton.setMargin(new Insets(0, 0, 0, 0)); //El boton no tine margenes, ocupa toda la casilla
@@ -246,7 +247,7 @@ public class Tablero {
   }
 
   /**
-   * Funcion auxiliar para distinguir entre click derecho o izquierdo
+   * Funcion auxiliar para distinguir entre click derecho, izquierdo o central
    * @param fila coordenada y
    * @param columna coordenada x
    * @return el {@code MouseAdapter} que gestiona las acciones de click del usuario
@@ -263,7 +264,7 @@ public class Tablero {
             manejarClickBanderilla(fila, columna);
           }
           else if (SwingUtilities.isMiddleMouseButton(e)){
-            //TODO
+            manejarClickCentral(fila, columna);
           }
         }
       }
@@ -282,11 +283,9 @@ public class Tablero {
       iniciarTimer();
     }
     switch(res){
-      case SEGUIR:
-        despejarCasilla(fila, columna, estadoToStr(juego.getCasilla(fila, columna))); break;
+      case SEGUIR: despejarCasilla(fila, columna, estadoToStr(juego.getCasilla(fila, columna))); break;
 
-      case HUECO:
-        despejarHuecos(); break;
+      case HUECO: despejarHuecos(); break;
 
       case DERROTA:
         despejarHuecos();
@@ -316,6 +315,29 @@ public class Tablero {
   }
 
   /**
+   * Manejo del click en modo despejar adyacentes
+   * @param fila coordenada y
+   * @param columna coordenada x
+   */
+  private void manejarClickCentral(int fila, int columna){
+    Resultado res = juego.clickCentral(fila, columna);
+    switch (res) {
+      case HUECO: despejarHuecos(); break;
+
+      case DERROTA: 
+        despejarHuecos(); 
+        finPartida(false); break;
+
+      case VICTORIA: 
+        despejarHuecos();
+        desactivarTablero();
+        finPartida(true); break;
+
+      default: break;
+    }
+  }
+
+  /**
    * Asigna un String dependiendo del estado de la casilla
    * @param casilla a convertir en String
    * @return el String de la {@code casilla}
@@ -339,14 +361,11 @@ public class Tablero {
    * Elimina todos los MouseListners para que esté disabled pero teniendo colores de texto
    * @param boton a desactivar
    */
-  private void quitarListeners(JButton boton) {
-    if (boton == null){
-      throw new NullPointerException("El boton es null");
-    }
-    for (MouseListener ml : boton.getMouseListeners()) {
-      boton.removeMouseListener(ml); //Elimino todos los MouseListners para que esté disabled pero teniendo colores de texto
-    }
-  }
+  // private void quitarListeners(JButton boton) {
+  //   for (MouseListener ml : boton.getMouseListeners()) {
+  //     boton.removeMouseListener(ml); //Elimino todos los MouseListners para que esté disabled pero teniendo colores de texto
+  //   }
+  // }
 
   /**
    * Despeja la {@code Casilla} (x,y) y le cambia el {@code Color} y el número a su botón
@@ -357,7 +376,7 @@ public class Tablero {
   private void despejarCasilla (int fila, int columna, String num){
     JButton boton = botones[fila][columna];
     boton.setText(num);
-    quitarListeners(boton);
+    ((ModeloCasilla) boton.getModel()).bloquear();
     boton.setBackground(getColor(fila, columna));
     boton.setForeground(addColorText(num));
   }
@@ -368,7 +387,7 @@ public class Tablero {
   private void desactivarTablero() {
     for (JButton[] fila : botones) {
       for (JButton boton : fila) {
-        quitarListeners(boton);
+        ((ModeloCasilla) boton.getModel()).bloquear();
       }
     }
   }
@@ -547,6 +566,45 @@ public class Tablero {
     inicializar(dificultad);
   }
   
+  /**
+   * Modelo de botón que deja de reaccionar (hover/pulsado) cuando está bloqueado
+   */
+  private static class ModeloCasilla extends DefaultButtonModel { //OBS: constructor por defecto de java (llama a super())
+    private boolean bloqueado = false;
+
+    protected boolean isBloqueado() {
+      return bloqueado;
+    }
+
+    protected void bloquear() {
+      super.setRollover(false);
+      super.setArmed(false);
+      super.setPressed(false);
+      bloqueado = true;
+    }
+
+    @Override public void setRollover(boolean b) { 
+      if (!bloqueado) {
+        super.setRollover(b); 
+      }
+    } 
+
+    @Override public void setArmed(boolean b) { 
+      if (!bloqueado) {
+        super.setArmed(b); 
+      }
+    }
+
+    @Override public void setPressed(boolean b)  { 
+      if (!bloqueado) {
+        super.setPressed(b); 
+      }
+    }
+  }
+
+  /**
+   * Niveles de dificultad para la partida
+   */
   public enum Dificultad{
     FACIL,
     NORMAL,
