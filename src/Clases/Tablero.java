@@ -7,20 +7,9 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import Clases.Juego.Resultado;
+import Clases.Records.Dificultad;
 
 public class Tablero {
-  private static final int MINAS_FACIL = 10;
-  private static final int MINAS_NORMAL = 40;
-  private static final int MINAS_DIFICIL = 99;
-
-  private static final int TAMANO_FACIL = 9;
-  private static final int TAMANO_NORMAL = 16;
-  private static final int TAMANO_DIFICIL = 22;
-
-  private static final int CELDA_FACIL = 67;
-  private static final int CELDA_NORMAL = 38;
-  private static final int CELDA_DIFICIL = 28;
-
   private static final Color VERDE_CLARITO = new Color(93, 209, 73);
   private static final Color VERDE_OSCURO = new Color(61, 167, 42);
   private static final Color VERDE_PANEL_SUPERIOR = new Color(23, 94, 48);
@@ -35,7 +24,7 @@ public class Tablero {
   private static final Color AZUL = new Color(73, 93, 209);
 
   private final JFrame ventana;
-  private final  JComboBox<String> reinicio;
+  private final  JComboBox<Dificultad> reinicio;
   private final HashMap<String, ImageIcon> cacheImagenes = new HashMap<>();
   private final Records registroRecords = new Records("records.txt");
   private JPanel panelBanderillas;
@@ -68,7 +57,7 @@ public class Tablero {
    */
   public Tablero () {
     //Inicializacion del boton de reinicio
-    reinicio = new JComboBox<>(new String[]{"FÁCIL", "NORMAL", "DIFÍCIL"});
+    reinicio = new JComboBox<>(Dificultad.values());
     reinicio.setPreferredSize(new Dimension(145, 40));
     reinicio.setFont(new Font("Rockwell", Font.BOLD, 20));
     reinicio.setFocusable(false);
@@ -78,13 +67,7 @@ public class Tablero {
     reinicio.setBorder(BorderFactory.createLineBorder(VERDE_PANEL_SUPERIOR, 2));
     reinicio.setBackground(VERDE_PASTEL_OSCURO);
     reinicio.setForeground(Color.WHITE);
-    reinicio.addActionListener(e -> {
-      switch (reinicio.getSelectedIndex()){
-        case 0: inicializar(Dificultad.FACIL); break;
-        case 1: inicializar(Dificultad.NORMAL); break;
-        case 2: inicializar(Dificultad.DIFICIL); break;
-      }; 
-    });
+    reinicio.addActionListener(e -> inicializar((Dificultad) reinicio.getSelectedItem()));
     //Crea un render para que el texto del JComboBox esté centrado
     DefaultListCellRenderer renderer = new DefaultListCellRenderer();
     renderer.setHorizontalAlignment(SwingConstants.CENTER);
@@ -94,9 +77,9 @@ public class Tablero {
     JPanel pantalla = new JPanel(new GridBagLayout());
 
     //Botones de dificultad
-    JButton facil = botonesDificultad(VERDE_CLARITO, "FÁCIL");
-    JButton normal = botonesDificultad(AZUL, "NORMAL");
-    JButton dificil = botonesDificultad(ROJO, "DIFÍCIL");
+    JButton facil = botonesDificultad(VERDE_CLARITO, Dificultad.FACIL);
+    JButton normal = botonesDificultad(AZUL, Dificultad.NORMAL);
+    JButton dificil = botonesDificultad(ROJO, Dificultad.DIFICIL);
     //Padding a los botones
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(0, 10, 0, 10); 
@@ -136,17 +119,17 @@ public class Tablero {
   /**
    * Función auxiliar para crear los botones de las dificultades
    * @param color {@code Color} del botón
-   * @param txt texto del botón
+   * @param dificultad {@code Records.Dificultad} del botón
    * @return el nuevo {@code JButton}
    */
-  private JButton botonesDificultad(Color color, String txt) {
-    JButton boton = new JButton(txt);
+  private JButton botonesDificultad(Color color, Dificultad dificultad) {
+    JButton boton = new JButton(dificultad.toString());
     boton.setBackground(color);
     boton.setFont(new Font("Rockwell", Font.BOLD, 16));
     boton.setForeground(Color.BLACK);
     boton.setPreferredSize(new Dimension(120, 30));
     boton.setFocusable(false); //Deshabilitar el enfoque
-    boton.addActionListener(e -> reinicio.setSelectedItem(txt));
+    boton.addActionListener(e -> reinicio.setSelectedItem(dificultad));
     return boton;
   }
 
@@ -159,13 +142,8 @@ public class Tablero {
     if (timer != null){ //Reiniciar contador si la partida anterior no se ha terminado
       timer.stop();
     }
-    dificultad = opcion;
-    int tamano = 0, tamanoCasilla = 0, minas = 0;
-    switch (opcion){            //Tamaños y minas para cada dificultad
-      case FACIL: minas = MINAS_FACIL; tamano = TAMANO_FACIL; tamanoCasilla = CELDA_FACIL; break;
-      case NORMAL: minas = MINAS_NORMAL; tamano = TAMANO_NORMAL; tamanoCasilla = CELDA_NORMAL; break;
-      case DIFICIL: minas = MINAS_DIFICIL; tamano = TAMANO_DIFICIL; tamanoCasilla = CELDA_DIFICIL; break;
-    }
+    this.dificultad = opcion;
+    int tamano = opcion.tamano, tamanoCasilla = opcion.celda, minas = opcion.minas;
     int dimension = tamano * tamanoCasilla;
     juego = new Juego(tamano, minas);
 
@@ -667,14 +645,5 @@ public class Tablero {
         super.setPressed(b); 
       }
     }
-  }
-
-  /**
-   * Niveles de dificultad para la partida
-   */
-  public enum Dificultad{
-    FACIL,
-    NORMAL,
-    DIFICIL
   }
 }

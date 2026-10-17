@@ -2,18 +2,20 @@ package Clases;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Juego {
   private final Casilla[][] tablero;
   private final int casillasFin;
   private final int minas;
+  private final List<Point> list;
   private int banderillas;
   private boolean primerClick = true;
   private boolean terminado = false;
   private int casillasDespejadas;
-  private ArrayList<Point> list;
 
   /**
    * Constructor
@@ -367,8 +369,8 @@ public class Juego {
    * Getter de list
    * @return {@code ArrayList<int[]>} lista de las coordenadas de las casillas expandidas
    */
-  public ArrayList<Point> getList(){
-    return this.list;
+  public List<Point> getList(){
+    return Collections.unmodifiableList(list);
   }
 
   /**

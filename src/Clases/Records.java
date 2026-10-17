@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
-import Clases.Tablero.Dificultad;
-
 public class Records {
   private final File archivo;
   private final Properties records;
@@ -82,5 +80,22 @@ public class Records {
    */
   public static String toStr(int segundos){
     return (segundos < 0) ? "___" : String.format("%02d:%02d", segundos / 60, segundos % 60);
+  }
+
+  /**
+   * Niveles de dificultad para la partida
+   */
+  public enum Dificultad {
+    FACIL(9, 10, 67), 
+    NORMAL(14, 40, 43), 
+    DIFICIL(20, 99, 30);
+
+    public final int tamano, minas, celda;
+    
+    Dificultad(int tamano, int minas, int celda) {
+      this.tamano = tamano;
+      this.minas = minas;
+      this.celda = celda;
+    }
   }
 }
