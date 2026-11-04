@@ -56,6 +56,8 @@ public class Tablero {
    * Inicializa la selección de dificultad
    */
   public Tablero () {
+    GridBagConstraints gbc = new GridBagConstraints();
+
     //Inicializacion del boton de reinicio
     reinicio = new JComboBox<>(Dificultad.values());
     reinicio.setPreferredSize(new Dimension(145, 40));
@@ -74,22 +76,58 @@ public class Tablero {
     reinicio.setRenderer(renderer);
 
     //Inicialicación del JPanel de la pantalla de inicio
-    JPanel pantalla = new JPanel(new GridBagLayout());
+    JPanel fondo = new JPanel(new GridBagLayout()) {
+      @Override
+      protected void paintComponent(Graphics g) {
+        final int lado = Dificultad.FACIL.celda;
+        super.paintComponent(g);
+        for (int y = 0; y * lado < getHeight(); y++) {
+          for (int x = 0; x * lado < getWidth(); x++) {
+            g.setColor((x + y) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO);
+            g.fillRect(x * lado, y * lado, lado, lado);
+          }
+        }
+      }
+    };
+    JPanel cuadrado = new JPanel(new GridBagLayout()) {
+      @Override
+      protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(new Color(255, 255, 255, 225));
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+        g2.dispose();
+        super.setOpaque(false);
+        super.paintComponent(g);
+      }
+    };
+    cuadrado.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); //Borde de relleno para que las cosas no esten en los bordes
+
+    //Título de selector de dificultad  
+    JLabel titulo = new JLabel("BUSCAMINAS", JLabel.CENTER);
+    titulo.setFont(new Font("Javanese Text", Font.BOLD, 40));
+    gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3; gbc.insets = new Insets(0, 0, 4, 0);
+    cuadrado.add(titulo, gbc);
+    fondo.add(cuadrado);
+
+    //Mensaje del selector de dificultad
+    JLabel mensaje = new JLabel("Seleccione la dificultad", JLabel.CENTER);
+    mensaje.setFont(new Font("Javanese Text", Font.BOLD, 25));
+    gbc.gridy = 1; gbc.insets = new Insets(0, 0, 28, 0);
+    cuadrado.add(mensaje, gbc);
 
     //Botones de dificultad
     JButton facil = botonesDificultad(VERDE_CLARITO, Dificultad.FACIL);
     JButton normal = botonesDificultad(AZUL, Dificultad.NORMAL);
     JButton dificil = botonesDificultad(ROJO, Dificultad.DIFICIL);
-    //Padding a los botones
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(0, 10, 0, 10); 
     //Se añaden los botones con el padding
-    pantalla.add(facil, gbc);
-    pantalla.add(normal, gbc);
-    pantalla.add(dificil, gbc);
+    gbc.gridy = 2; gbc.gridwidth = 1; gbc.insets = new Insets(0, 14, 0, 14);
+    gbc.gridx = 0; cuadrado.add(facil, gbc);
+    gbc.gridx = 1; cuadrado.add(normal, gbc);
+    gbc.gridx = 2;cuadrado.add(dificil, gbc);
 
     //Inicializacion de la ventana
-    ventana = new JFrame("Buscaminas");        
+    ventana = new JFrame("Buscaminas");       
     ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
     ventana.setLayout(new BorderLayout());  
     ventana.setResizable(false); 
@@ -103,15 +141,9 @@ public class Tablero {
     else {
       ventana.setIconImage(new ImageIcon(iconURL).getImage());
     }
-    //Mensaje de selector de dificultad
-    JLabel mensaje = new JLabel("", JLabel.CENTER);
-    mensaje.setFont(new Font("Javanese Text", Font.BOLD, 25));
-    mensaje.setText("Seleccione la dificultad");
-    mensaje.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0));
 
     //Se añade todo a la ventana
-    ventana.add(mensaje, BorderLayout.NORTH);
-    ventana.add(pantalla, BorderLayout.CENTER);   
+    ventana.add(fondo, BorderLayout.CENTER);   
     ventana.revalidate();  //Actualiza la ventana
     ventana.setVisible(true);
   }
@@ -125,9 +157,9 @@ public class Tablero {
   private JButton botonesDificultad(Color color, Dificultad dificultad) {
     JButton boton = new JButton(dificultad.toString());
     boton.setBackground(color);
-    boton.setFont(new Font("Rockwell", Font.BOLD, 16));
+    boton.setFont(new Font("Rockwell", Font.BOLD, 18));
     boton.setForeground(Color.BLACK);
-    boton.setPreferredSize(new Dimension(120, 30));
+    boton.setPreferredSize(new Dimension(150, 45));
     boton.setFocusable(false); //Deshabilitar el enfoque
     boton.addActionListener(e -> reinicio.setSelectedItem(dificultad));
     return boton;
@@ -256,7 +288,7 @@ public class Tablero {
       return  casilla.esOculta();
     }
     if (SwingUtilities.isRightMouseButton(e)){
-      return casilla.esOculta() || casilla.esBanderilla();
+      return (casilla.esOculta() || casilla.esBanderilla()) && !juego.getPrimerClick();
     }
     if (SwingUtilities.isMiddleMouseButton(e)){
       return juego.getCasilla(fila, columna).esNumero();
