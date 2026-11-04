@@ -76,7 +76,7 @@ public class Tablero {
     reinicio.setRenderer(renderer);
 
     //Inicialicación del JPanel de la pantalla de inicio
-    JPanel fondo = new JPanel(new GridBagLayout()) {
+    JPanel fondo = new JPanel(new GridBagLayout()) { // Pinta un fondo de cuadrados verdes
       @Override
       protected void paintComponent(Graphics g) {
         final int lado = Dificultad.FACIL.celda;
@@ -89,7 +89,7 @@ public class Tablero {
         }
       }
     };
-    JPanel cuadrado = new JPanel(new GridBagLayout()) {
+    JPanel tarjeta = new JPanel(new GridBagLayout()) { // 
       @Override
       protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
@@ -97,24 +97,25 @@ public class Tablero {
         g2.setColor(new Color(255, 255, 255, 225));
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
         g2.dispose();
-        super.setOpaque(false);
         super.paintComponent(g);
       }
     };
-    cuadrado.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); //Borde de relleno para que las cosas no esten en los bordes
+    tarjeta.setOpaque(false);
+    tarjeta.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); //Borde de relleno para que las cosas no esten en los bordes
 
     //Título de selector de dificultad  
     JLabel titulo = new JLabel("BUSCAMINAS", JLabel.CENTER);
     titulo.setFont(new Font("Javanese Text", Font.BOLD, 40));
+    titulo.setForeground(VERDE_PANEL_SUPERIOR);
     gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3; gbc.insets = new Insets(0, 0, 4, 0);
-    cuadrado.add(titulo, gbc);
-    fondo.add(cuadrado);
+    tarjeta.add(titulo, gbc);
+    fondo.add(tarjeta);
 
     //Mensaje del selector de dificultad
     JLabel mensaje = new JLabel("Seleccione la dificultad", JLabel.CENTER);
     mensaje.setFont(new Font("Javanese Text", Font.BOLD, 25));
     gbc.gridy = 1; gbc.insets = new Insets(0, 0, 28, 0);
-    cuadrado.add(mensaje, gbc);
+    tarjeta.add(mensaje, gbc);
 
     //Botones de dificultad
     JButton facil = botonesDificultad(VERDE_CLARITO, Dificultad.FACIL);
@@ -122,9 +123,14 @@ public class Tablero {
     JButton dificil = botonesDificultad(ROJO, Dificultad.DIFICIL);
     //Se añaden los botones con el padding
     gbc.gridy = 2; gbc.gridwidth = 1; gbc.insets = new Insets(0, 14, 0, 14);
-    gbc.gridx = 0; cuadrado.add(facil, gbc);
-    gbc.gridx = 1; cuadrado.add(normal, gbc);
-    gbc.gridx = 2;cuadrado.add(dificil, gbc);
+    gbc.gridx = 0; tarjeta.add(facil, gbc);
+    gbc.gridx = 1; tarjeta.add(normal, gbc);
+    gbc.gridx = 2;tarjeta.add(dificil, gbc);
+    
+    gbc.gridy = 3; gbc.insets = new Insets(14, 14, 0, 14);
+    gbc.gridx = 0; tarjeta.add(etiquetasRecords(Dificultad.FACIL), gbc);
+    gbc.gridx = 1; tarjeta.add(etiquetasRecords(Dificultad.NORMAL), gbc);
+    gbc.gridx = 2;tarjeta.add(etiquetasRecords(Dificultad.DIFICIL), gbc);
 
     //Inicializacion de la ventana
     ventana = new JFrame("Buscaminas");       
@@ -154,15 +160,27 @@ public class Tablero {
    * @param dificultad {@code Records.Dificultad} del botón
    * @return el nuevo {@code JButton}
    */
-  private JButton botonesDificultad(Color color, Dificultad dificultad) {
-    JButton boton = new JButton(dificultad.toString());
+  private JButton botonesDificultad(Color color, Dificultad dif) {
+    JButton boton = new JButton(dif.toString());
     boton.setBackground(color);
     boton.setFont(new Font("Rockwell", Font.BOLD, 18));
     boton.setForeground(Color.BLACK);
     boton.setPreferredSize(new Dimension(150, 45));
     boton.setFocusable(false); //Deshabilitar el enfoque
-    boton.addActionListener(e -> reinicio.setSelectedItem(dificultad));
+    boton.addActionListener(e -> reinicio.setSelectedItem(dif));
     return boton;
+  }
+
+  /**
+   * 
+   * @param dif
+   * @return
+   */
+  private JLabel etiquetasRecords(Dificultad dif){
+    JLabel record = new JLabel("🏆 " + Records.toStr(registroRecords.getRecord(dif)));
+    record.setFont(new Font("Dialog", Font.BOLD, 14));
+    record.setForeground(VERDE_PANEL_SUPERIOR);
+    return record;
   }
 
   /**
@@ -529,7 +547,7 @@ public class Tablero {
    * Pone las imagenes que corresponda con el numero de banderillas restantes
    */
   private void numBanderillas(){ 
-    int banderillas = juego.esBanderillasRestantes();
+    int banderillas = juego.getBanderillasRestantes();
     //Primer numero
     imagen1.setIcon(getImageIcon(rutas[banderillas / 10], 50, 50)); 
     //Segundo numero
