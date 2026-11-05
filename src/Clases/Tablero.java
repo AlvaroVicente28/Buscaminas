@@ -56,88 +56,15 @@ public class Tablero {
    * Inicializa la selección de dificultad
    */
   public Tablero () {
-    GridBagConstraints gbc = new GridBagConstraints();
-
-    //Inicializacion del boton de reinicio
-    reinicio = new JComboBox<>(Dificultad.values());
-    reinicio.setPreferredSize(new Dimension(145, 40));
-    reinicio.setFont(new Font("Rockwell", Font.BOLD, 20));
-    reinicio.setFocusable(false);
-    reinicio.setOpaque(true);
-    reinicio.getComponent(0).setBackground(VERDE_PASTEL_OSCURO);
-    
-    reinicio.setBorder(BorderFactory.createLineBorder(VERDE_PANEL_SUPERIOR, 2));
-    reinicio.setBackground(VERDE_PASTEL_OSCURO);
-    reinicio.setForeground(Color.WHITE);
-    reinicio.addActionListener(e -> inicializar((Dificultad) reinicio.getSelectedItem()));
-    //Crea un render para que el texto del JComboBox esté centrado
-    DefaultListCellRenderer renderer = new DefaultListCellRenderer();
-    renderer.setHorizontalAlignment(SwingConstants.CENTER);
-    reinicio.setRenderer(renderer);
-
-    //Inicialicación del JPanel de la pantalla de inicio
-    JPanel fondo = new JPanel(new GridBagLayout()) { // Pinta un fondo de cuadrados verdes
-      @Override
-      protected void paintComponent(Graphics g) {
-        final int lado = Dificultad.FACIL.celda;
-        super.paintComponent(g);
-        for (int y = 0; y * lado < getHeight(); y++) {
-          for (int x = 0; x * lado < getWidth(); x++) {
-            g.setColor((x + y) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO);
-            g.fillRect(x * lado, y * lado, lado, lado);
-          }
-        }
-      }
-    };
-    JPanel tarjeta = new JPanel(new GridBagLayout()) { // 
-      @Override
-      protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(new Color(255, 255, 255, 225));
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
-        g2.dispose();
-        super.paintComponent(g);
-      }
-    };
-    tarjeta.setOpaque(false);
-    tarjeta.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); //Borde de relleno para que las cosas no esten en los bordes
-
-    //Título de selector de dificultad  
-    JLabel titulo = new JLabel("BUSCAMINAS", JLabel.CENTER);
-    titulo.setFont(new Font("Javanese Text", Font.BOLD, 40));
-    titulo.setForeground(VERDE_PANEL_SUPERIOR);
-    gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3; gbc.insets = new Insets(0, 0, 4, 0);
-    tarjeta.add(titulo, gbc);
-    fondo.add(tarjeta);
-
-    //Mensaje del selector de dificultad
-    JLabel mensaje = new JLabel("Seleccione la dificultad", JLabel.CENTER);
-    mensaje.setFont(new Font("Javanese Text", Font.BOLD, 25));
-    gbc.gridy = 1; gbc.insets = new Insets(0, 0, 28, 0);
-    tarjeta.add(mensaje, gbc);
-
-    //Botones de dificultad
-    JButton facil = botonesDificultad(VERDE_CLARITO, Dificultad.FACIL);
-    JButton normal = botonesDificultad(AZUL, Dificultad.NORMAL);
-    JButton dificil = botonesDificultad(ROJO, Dificultad.DIFICIL);
-    //Se añaden los botones con el padding
-    gbc.gridy = 2; gbc.gridwidth = 1; gbc.insets = new Insets(0, 14, 0, 14);
-    gbc.gridx = 0; tarjeta.add(facil, gbc);
-    gbc.gridx = 1; tarjeta.add(normal, gbc);
-    gbc.gridx = 2;tarjeta.add(dificil, gbc);
-    
-    gbc.gridy = 3; gbc.insets = new Insets(14, 14, 0, 14);
-    gbc.gridx = 0; tarjeta.add(etiquetasRecords(Dificultad.FACIL), gbc);
-    gbc.gridx = 1; tarjeta.add(etiquetasRecords(Dificultad.NORMAL), gbc);
-    gbc.gridx = 2;tarjeta.add(etiquetasRecords(Dificultad.DIFICIL), gbc);
+    reinicio = crearComboBox();
+    JPanel fondo = crearPantallaInicio();
 
     //Inicializacion de la ventana
     ventana = new JFrame("Buscaminas");       
     ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
     ventana.setLayout(new BorderLayout());  
-    ventana.setResizable(false); 
-    ventana.setSize(1080, 720);
+    ventana.getContentPane().setPreferredSize(new Dimension(1080, 720));
+    ventana.pack();
     ventana.setLocationRelativeTo(null); //OBS: si se llama despues de darle tamaño se centra
     //Icono de la ventana
     java.net.URL iconURL = getClass().getResource("/Imagenes/Buscaminas_Icono.png");
@@ -155,9 +82,99 @@ public class Tablero {
   }
 
   /**
+   * Función auxiliar para inicializar el JComboBox de las dificultades
+   * @return {@code JComboBox<Dificultad>} inizializado
+   */
+  private JComboBox<Dificultad> crearComboBox() {
+    JComboBox<Dificultad> combo = new JComboBox<>(Dificultad.values());
+    combo.setPreferredSize(new Dimension(145, 40));
+    combo.setFont(new Font("Rockwell", Font.BOLD, 20));
+    combo.setFocusable(false);
+    combo.setOpaque(true);
+    combo.getComponent(0).setBackground(VERDE_PASTEL_OSCURO);
+
+    combo.setBorder(BorderFactory.createLineBorder(VERDE_PANEL_SUPERIOR, 2));
+    combo.setBackground(VERDE_PASTEL_OSCURO);
+    combo.setForeground(Color.WHITE);
+    combo.addActionListener(e -> inicializar((Dificultad) combo.getSelectedItem()));
+    //Crea un render para que el texto del JComboBox esté centrado
+    DefaultListCellRenderer renderer = new DefaultListCellRenderer();
+    renderer.setHorizontalAlignment(SwingConstants.CENTER);
+    combo.setRenderer(renderer);
+    return combo;
+  }
+
+  /**
+   * Función auxiliar que crea la pantalla de inicio
+   * @return {@code JPanel} inicializado de la pantalla de inicio
+   */
+  private JPanel crearPantallaInicio(){
+    GridBagConstraints gbc = new GridBagConstraints();
+    JPanel fondo = crearFondo();
+    JPanel tarjeta = new JPanel(new GridBagLayout()) { // Tarjeta en el centro con el texto de la pantalla inicial
+      @Override
+      protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(new Color(255, 255, 255, 225));
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+        super.paintComponent(g);
+      }
+    };
+    tarjeta.setOpaque(false);
+    tarjeta.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50)); //Borde de relleno para que las cosas no esten en los bordes
+
+    //Título de selector de dificultad  
+    JLabel titulo = new JLabel("BUSCAMINAS", JLabel.CENTER);
+    titulo.setFont(new Font("Javanese Text", Font.BOLD, 55));
+    titulo.setForeground(VERDE_PANEL_SUPERIOR);
+    gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3; gbc.insets = new Insets(0, 0, 4, 0);
+    tarjeta.add(titulo, gbc);
+
+    //Mensaje del selector de dificultad
+    JLabel mensaje = new JLabel("Seleccione la dificultad", JLabel.CENTER);
+    mensaje.setFont(new Font("Javanese Text", Font.BOLD, 25));
+    gbc.gridy = 1; gbc.insets = new Insets(0, 0, 28, 0);
+    tarjeta.add(mensaje, gbc);
+    fondo.add(tarjeta);
+
+    Color[] colores = {VERDE_CLARITO, AZUL, ROJO};
+    gbc.gridwidth = 1;
+    for (Dificultad d : Dificultad.values()) {
+      gbc.gridx = d.ordinal();
+      System.err.println(d.ordinal());
+      gbc.gridy = 2; gbc.insets = new Insets(0, 14, 0, 14);
+      tarjeta.add(botonesDificultad(colores[d.ordinal()], d), gbc);
+      gbc.gridy = 3; gbc.insets = new Insets(14, 14, 0, 14);
+      tarjeta.add(etiquetasRecords(d), gbc);
+    }
+    return fondo;
+  }
+
+  /**
+   * Función auxiliar que crea un fondo de cuadricula verde
+   * @return {@code JPanel} con la cuadricula como fondo
+   */
+  private JPanel crearFondo() {
+    return new JPanel(new GridBagLayout()) {
+      @Override
+      protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        final int lado = Dificultad.FACIL.celda;
+        for (int y = 0; y * lado < getHeight(); y++) {
+          for (int x = 0; x * lado < getWidth(); x++) {
+            g.setColor((x + y) % 2 == 0 ? VERDE_CLARITO : VERDE_OSCURO);
+            g.fillRect(x * lado, y * lado, lado, lado);
+          }
+        }
+      }
+    };
+  }
+
+  /**
    * Función auxiliar para crear los botones de las dificultades
    * @param color {@code Color} del botón
-   * @param dificultad {@code Records.Dificultad} del botón
+   * @param dif {@code Records.Dificultad} del botón
    * @return el nuevo {@code JButton}
    */
   private JButton botonesDificultad(Color color, Dificultad dif) {
@@ -172,9 +189,9 @@ public class Tablero {
   }
 
   /**
-   * 
-   * @param dif
-   * @return
+   * Función auxiliar para añadir los records de cada dificultad a la pantalla de inicio
+   * @param dif {@code Records.Dificultad} para el record
+   * @return {@code JLabel} con el record para la dificultad dada
    */
   private JLabel etiquetasRecords(Dificultad dif){
     JLabel record = new JLabel("🏆 " + Records.toStr(registroRecords.getRecord(dif)));
@@ -189,7 +206,7 @@ public class Tablero {
    */
   private void inicializar(Dificultad opcion) {
     ventana.getContentPane().removeAll(); //Limpio la ventana
-    if (timer != null){ //Reiniciar contador si la partida anterior no se ha terminado
+    if (timer != null){ //Reiniciar contador si la partida anterior se ha terminado
       timer.stop();
     }
     this.dificultad = opcion;
