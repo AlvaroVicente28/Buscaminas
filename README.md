@@ -1,6 +1,12 @@
 # Buscaminas
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Swing](https://img.shields.io/badge/GUI-Swing-blue?style=for-the-badge)
 
 Una implementación con interfaz gráfica para jugar al buscaminas hecha en Java usando Swing.
+
+| Pantalla de inicio | Partida |
+|:---:|:---:|
+| <img src="docs/screenshot/Pantalla%20Inicial.png" alt="Pantalla de inicio" width="420"> | <img src="docs/screenshot/Partida.png" alt="Partida en curso" width="420"> |
 
 ## Descripción
 
@@ -8,15 +14,15 @@ El juego consiste en despejar un tablero de casillas sin revelar ninguna mina. E
 
 ## Controles
 
-- Click izquierdo: Despejar casilla.
-- Click derecho: Colocar/quitar banderilla.
-- Click central: Despejar vecinos si la casilla la tiene todos sus banderillas puestas.
+- **Click izquierdo**: Despejar casilla.
+- **Click derecho**: Colocar/quitar banderilla.
+- **Click central**: Despejar vecinos si la casilla la tiene todos sus banderillas puestas.
 
 ## Características
 
-- Hay tres niveles de dificultad: fácil (9x9, 10 minas), normal (16x16, 40 minas) y difícil (22x22, 99 minas).
-- Cronómetro en la partida
-- Registro de mejores tiempos por dificultad
+- Hay **tres niveles de dificultad**: fácil (9x9, 10 minas), normal (16x16, 40 minas) y difícil (22x22, 99 minas).
+- **Cronómetro** en la partida
+- **Registro** de **mejores tiempos**  por dificultad
 - Sistema de banderillas para marcar minas
 
 ## Recursos gráficos
@@ -32,14 +38,42 @@ Las imágenes utilizadas en el juego (números, banderilla e icono de la aplicac
 - `src/App.java` — Main
 - `src/Imagenes/` — Recursos gráficos del juego
 
-## Requisitos
+## Instalación y ejecución
 
-- Java 8 o superior
+Es necesario contar con Java 8 o superior. Clona el repositorio y compile el proyecto desde la carpeta raíz del proyecto:
 
-## Ejecución
+**Linux / macOS**
+```bash
+mkdir -p bin
+javac -encoding UTF-8 -d bin src/App.java src/Clases/*.java
+cp -r src/Imagenes bin/
+java -cp bin App
+```
 
-Compilar y ejecutar la clase `App.java`, ubicada en la raíz del directorio `src`.
+Los récords se guardan en `records.txt`, en la raíz.
+
+**Windows**
+```
+mkdir bin
+javac -encoding UTF-8 -d bin src\App.java src\Clases\*.java
+xcopy /E /I /Y src\Imagenes bin\Imagenes
+java -cp bin App
+```
+
+### Generar un .jar ejecutable (opcional)
+**Linux / macOS**
+```bash
+jar cfe Buscaminas.jar App -C bin .
+java -jar Buscaminas.jar
+```
+**Windows**
+```
+mkdir bin
+javac -encoding UTF-8 -d bin src\App.java src\Clases\*.java
+xcopy /E /I /Y src\Imagenes bin\Imagenes
+jar cfe Buscaminas.jar App -C bin .
+```
 
 ## Autor
 
-Álvaro Vicente Bonilla.
+Álvaro Vicente Bonilla - [AlvaroVicente28](https://github.com/AlvaroVicente28)
