@@ -142,7 +142,6 @@ public class Tablero {
     gbc.gridwidth = 1;
     for (Dificultad d : Dificultad.values()) {
       gbc.gridx = d.ordinal();
-      System.err.println(d.ordinal());
       gbc.gridy = 2; gbc.insets = new Insets(0, 14, 0, 14);
       tarjeta.add(botonesDificultad(colores[d.ordinal()], d), gbc);
       gbc.gridy = 3; gbc.insets = new Insets(14, 14, 0, 14);
