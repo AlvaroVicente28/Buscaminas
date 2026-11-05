@@ -31,12 +31,14 @@ Las imágenes utilizadas en el juego (números, banderilla e icono de la aplicac
 
 ## Estructura
 
-- `Clases/Casilla.java` — Modelo de cada casilla del tablero
-- `Clases/Juego.java` — Lógica del juego
-- `Clases/Tablero.java` — Interfaz gráfica
-- `Clases/Records.java` — Gestor de los records en cada dificultad
+- `src/Clases/Casilla.java` — Modelo de cada casilla del tablero
+- `src/Clases/Juego.java` — Lógica del juego
+- `src/Clases/Tablero.java` — Interfaz gráfica
+- `src/Clases/Records.java` — Gestor de los records en cada dificultad
 - `src/App.java` — Main
 - `src/Imagenes/` — Recursos gráficos del juego
+- `docs/screenshot/` — Imagenes pare el README
+- `records.txt` — Documento de texto con los records
 
 ## Instalación y ejecución
 
@@ -49,8 +51,6 @@ javac -encoding UTF-8 -d bin src/App.java src/Clases/*.java
 cp -r src/Imagenes bin/
 java -cp bin App
 ```
-
-Los récords se guardan en `records.txt`, en la raíz.
 
 **Windows**
 ```
