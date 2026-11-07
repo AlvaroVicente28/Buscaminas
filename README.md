@@ -1,9 +1,9 @@
 # Buscaminas
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![JUnit](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
 ![Swing](https://img.shields.io/badge/GUI-Swing-blue?style=for-the-badge)
-<!-- ![JUnit](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white) -->
-<!-- ![Licencia](https://img.shields.io/github/license/AlvaroVicente28/NOMBRE-DEL-REPO?style=for-the-badge) -->
+![Licencia](https://img.shields.io/github/license/AlvaroVicente28/Buscaminas?style=for-the-badge)
 
 Una implementación con interfaz gráfica para jugar al buscaminas hecha en Java usando Swing.
 
@@ -38,6 +38,7 @@ Las imágenes utilizadas en el juego (números, banderilla e icono de la aplicac
 - `src/main/java/Clases/Juego.java` — Lógica del juego
 - `src/main/java/Clases/Tablero.java` — Interfaz gráfica
 - `src/main/java/Clases/Records.java` — Gestor de los records en cada dificultad
+- `src/test/java/Clases/` — Tests
 - `src/main/java/App.java` — Main
 - `src/main/resources/Imagenes/` — Recursos gráficos del juego
 - `docs/screenshot/` — Imagenes pare el README
@@ -56,6 +57,15 @@ O también:
 ```bash
 ./mvnw package
 java -jar target/Buscaminas.jar
+```
+
+## Tests
+
+El proyecto incluye tests con JUnit 5 que cubren el modelo de casilla y el registro de récords. Para ejecutarlos:
+
+**Linux / macOS y Windows**
+```bash
+./mvnw test
 ```
 
 ## Licencia
